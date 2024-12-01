@@ -1,4 +1,4 @@
-import json
+import json5
 
 from simulation import simulation_instance
 
@@ -31,11 +31,10 @@ def process_client_request(data):
     """
     # For now, echo the data back
     try:
-        request = json.loads(data)
+        request = json5.loads(data)
         simulation_instance.command_queue.put(request)
-        # Placeholder response
         response = {"status": "success", "message": "Data received"}
-    except json.JSONDecodeError:
+    except json5.JSONDecodeError:
         response = {"status": "error", "message": "Invalid JSON format"}
     
-    return json.dumps(request)
+    return json5.dumps(request)

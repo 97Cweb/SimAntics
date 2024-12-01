@@ -1,6 +1,7 @@
 import time
 import threading
 
+from lupa import LuaRuntime
 from queue import Queue
 
 class Simulation:
@@ -8,6 +9,7 @@ class Simulation:
         self.game_state = {"nests": [], "ants": [], "resources": []}
         self.running = False
         self.command_queue = Queue()
+        self.lua = LuaRuntime(unpack_returned_tuples=True)  # Initialize Lua runtime
 
     def start(self):
         """Start the simulation loop in a separate thread."""
@@ -27,9 +29,33 @@ class Simulation:
             time.sleep(0.1)  # Adjust the tick rate (e.g., 10 ticks per second)
 
     def update(self):
+        
+        while not self.command_queue.empty():
+           command = self.command_queue.get()
+           print(f"Processing command: {command}")
+           self.process_command(command)
         """Run one tick of the game simulation."""
         print("Simulating one game tick...")
         # Add simulation logic here
 
+    def process_command(self, command):
+        """
+        Handle commands from the queue.
+        Commands can include Lua scripts or other client actions.
+        """
+        if "script" in command:
+            self.execute_lua(command["script"])
+        else:
+            print(f"Unhandled command: {command}")
+    
+    def execute_lua(self, script):
+        """Execute a Lua script."""
+        try:
+            result = self.lua.execute(script)
+            print(f"Lua script executed successfully: {result}")
+        except Exception as e:
+            print(f"Error executing Lua script: {e}")
+            
+            
 # Singleton simulation instance
 simulation_instance = Simulation()
