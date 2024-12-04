@@ -1,19 +1,20 @@
 import socket
 import threading
 import json5
+import time
 
 from client_connection import ClientConnection
 
 
 class Server(threading.Thread):
-    def __init__(self, host='127.0.0.1', port=65432):
+    def __init__(self, host='127.0.0.1', port=65432, inactivity_timeout=15):
         super().__init__()
         self.host = host
         self.port = port
         self.server_socket = None
         self.running = False
         self.connected_clients = {} #username -> client_connection
-
+        self.inactivity_timeout = inactivity_timeout
 
     def authenticate(self, credentials):
         """Authenticate client"""
@@ -34,6 +35,7 @@ class Server(threading.Thread):
                client_connection = self.connected_clients[username] = ClientConnection(username)
                client_connection.assign_client_socket(client_socket)
                print(f"client {username} authenticated and connected.")
+               client_socket.sendall(json5.dumps({"status": "success", "message": "Authentication succeeded"}).encode('utf-8'))
            else:
                client_socket.sendall(json5.dumps({"status": "error", "message": "Authentication failed"}).encode('utf-8'))
                client_socket.close()
@@ -50,6 +52,8 @@ class Server(threading.Thread):
         self.server_socket.settimeout(1.0)  # Non-blocking with 1-second timeout
         print(f"Server listening on {self.host}:{self.port}")
 
+        threading.Thread(target=self.heartbeat_monitor, daemon=True).start()
+        
         while self.running:
             try:
                 client_socket, client_address = self.server_socket.accept()
@@ -67,3 +71,19 @@ class Server(threading.Thread):
         print("Server stopped.")
 
 
+    def disconnect_client(self, username):
+        """Handle client disconnection."""
+        if username in self.connected_clients:
+            client_connection = self.connected_clients.pop(username)
+            client_connection.remove_client_socket()
+            print(f"Client {username} disconnected.")
+
+    def heartbeat_monitor(self):
+        """Check for inactive clients periodically."""
+        while self.running:
+            time.sleep(5)  # Check every 5 seconds
+            current_time = time.time()
+            for username, client_connection in list(self.connected_clients.items()):
+                if (current_time - client_connection.last_active) > self.inactivity_timeout:
+                    print(f"Client {username} timed out due to inactivity.")
+                    self.disconnect_client(username)

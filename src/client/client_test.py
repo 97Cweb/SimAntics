@@ -14,9 +14,10 @@ def send_keep_alive(client):
             time.sleep(KEEP_ALIVE_INTERVAL)
             message = json5.dumps({"type": "keep_alive"})
             client.sendall(message.encode('utf-8'))
-        except (ConnectionResetError, BrokenPipeError):
+        except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
             print("Disconnected from server.")
             break
+
 
 def main():
     try:
@@ -37,11 +38,15 @@ def main():
         
         # Simulate other client actions
         while keep_alive_thread.is_alive():
-            time.sleep(10)  # Replace with actual client logic
+            time.sleep(0.1)  # Replace with actual client logic
     except KeyboardInterrupt:
-        print("stopping client...")
-        
+        print("Stopping client...")
+    except Exception as e:
+        print(f"Client error: {e}")
     finally:
+        # Ensure resources are cleaned up
+        if keep_alive_thread:
+            keep_alive_thread.join()  # Wait for the keep-alive thread to finish
         if client:
             client.close()
         print("Client has stopped.")
