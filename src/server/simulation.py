@@ -1,6 +1,8 @@
 import time
 import threading
 
+from player import Player
+
 from lupa import LuaRuntime
 from queue import Queue
 
@@ -10,6 +12,7 @@ class Simulation:
         self.running = False
         self.command_queue = Queue()
         self.lua = LuaRuntime(unpack_returned_tuples=True)  # Initialize Lua runtime
+        self.players = {}
 
     def start(self):
         """Start the simulation loop in a separate thread."""
