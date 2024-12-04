@@ -37,6 +37,7 @@ class Simulation:
            command = self.command_queue.get()
            print(f"Processing command: {command}")
            self.process_command(command)
+           
         """Run one tick of the game simulation."""
         print("Simulating one game tick...")
         # Add simulation logic here
@@ -46,8 +47,12 @@ class Simulation:
         Handle commands from the queue.
         Commands can include Lua scripts or other client actions.
         """
-        if "script" in command:
-            self.execute_lua(command["script"])
+        if "event" in command:
+            if command["event"] == "login":
+                username = command["username"]
+                if username not in self.players:
+                    print("adding player")
+                    self.players[username] = Player(username)
         else:
             print(f"Unhandled command: {command}")
     

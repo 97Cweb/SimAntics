@@ -4,6 +4,7 @@ import json5
 import time
 
 from client_connection import ClientConnection
+from simulation import simulation_instance
 
 
 class Server(threading.Thread):
@@ -36,6 +37,8 @@ class Server(threading.Thread):
                client_connection.assign_client_socket(client_socket)
                print(f"client {username} authenticated and connected.")
                client_socket.sendall(json5.dumps({"status": "success", "message": "Authentication succeeded"}).encode('utf-8'))
+               # Notify simulation of the new player
+               self.notify_simulation(event="login", username=username)
            else:
                client_socket.sendall(json5.dumps({"status": "error", "message": "Authentication failed"}).encode('utf-8'))
                client_socket.close()
@@ -70,6 +73,11 @@ class Server(threading.Thread):
             self.server_socket.close()
         print("Server stopped.")
 
+    def notify_simulation(self, event, username):
+        simulation_instance.command_queue.put({
+            "event":event,
+            "username":username
+            })
 
     def disconnect_client(self, username):
         """Handle client disconnection."""
@@ -86,4 +94,7 @@ class Server(threading.Thread):
             for username, client_connection in list(self.connected_clients.items()):
                 if (current_time - client_connection.last_active) > self.inactivity_timeout:
                     print(f"Client {username} timed out due to inactivity.")
+                    self.notify_simulation("logout", username)
                     self.disconnect_client(username)
+                    
+                    
