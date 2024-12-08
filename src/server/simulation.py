@@ -7,13 +7,42 @@ from lupa import LuaRuntime
 from queue import Queue
 
 class Simulation:
-    def __init__(self):
+    def __init__(self, x=10, y=10, map_update_interval=1.0):
+        
+        self.lua = LuaRuntime(unpack_returned_tuples=True)  # Initialize Lua runtime
+        
+        self.grid = [[self.lua.table_from({"terrain": 0, "resources": 0}) for _ in range(x)] for _ in range(y)]
+        self.temp_grid = [[self.lua.table_from({"terrain": 0, "resources": 0}) for _ in range(x)] for _ in range(y)]
+        self.x = x
+        self.y = y
+        
+        self.map_update_interval = map_update_interval
         self.game_state = {"nests": [], "ants": [], "resources": []}
         self.running = False
         self.command_queue = Queue()
-        self.lua = LuaRuntime(unpack_returned_tuples=True)  # Initialize Lua runtime
         self.players = {}
-        self.frame_counter = 0
+        self.frame_counter = 0   
+        
+        self.last_map_update = time.time()
+        
+        
+        self.map_update_script = self.lua.eval('''
+    function(in_grid, out_grid, frame)
+        for i, row in python.enumerate(in_grid) do
+            for j, cell in python.enumerate(row) do
+                local cell = in_grid[i][j]
+                if type(cell) == "table" then
+                    print(cell["resources"])
+                    -- Example computation: Copy resources with a cap
+                    out_grid[i][j]["resources"] = math.min(cell["resources"] + 1, 10)
+                end
+                
+            end
+        end
+        return out_grid
+    end
+''')
+
         
 
     def start(self,server_outbound_queue):
@@ -30,28 +59,70 @@ class Simulation:
     def run(self):
         """Run the simulation loop."""
         print("Simulation started.")
+        
         while self.running:
             self.update()
             time.sleep(0.1)  # Adjust the tick rate (e.g., 10 ticks per second)
 
     def update(self):
-        
+        current_time = time.time()
         while not self.command_queue.empty():
+           
            command = self.command_queue.get()
            print(f"Processing command: {command}")
            self.process_command(command)
-           
-        self.frame_counter += 1
         
-        state = {
-            "frame": self.frame_counter,
-            "players": {username: {"human": player.is_human} for username, player in self.players.items()}
-        }
-        self.server_outbound_queue.put(state)
-           
+        
+        # Update map
+        if current_time - self.last_map_update >= self.map_update_interval:
+            self.update_map()
+            self.last_map_update = current_time
+            
+            state = {
+                "frame": self.frame_counter,
+                "map": self.grid
+            }
+            
+            self.broadcast_update(state)
+        
+        self.frame_counter += 1
+
         """Run one tick of the game simulation."""
         print("Simulating one game tick...")
 
+
+    def broadcast_update(self, state):
+        self.server_outbound_queue.put(state)
+        
+        
+    def update_map(self):
+        """Update the grid state for growth using the Lua script."""
+        print(self.format_grid())
+        
+        # Run the Lua script
+        self.grid = self.map_update_script(self.grid, self.temp_grid, self.frame_counter)
+        
+
+    def format_grid(self):
+        """Convert the grid to a human-readable format for printing."""
+        formatted_grid = []
+        for row in self.grid:
+            formatted_row = []
+            for cell in row:
+                # Extract data from the Lua table
+                formatted_row.append({
+                    "terrain": cell["terrain"],
+                    "resources": cell["resources"]
+                })
+            formatted_grid.append(formatted_row)
+        return formatted_grid
+
+
+    def set_map_update_script(self, lua_script):
+        """Set a custom Lua script for growth updates."""
+        self.map_update_script = self.lua.eval(lua_script)
+        
+        
     def process_command(self, command):
         """
         Handle commands from the queue.
@@ -74,6 +145,3 @@ class Simulation:
         except Exception as e:
             print(f"Error executing Lua script: {e}")
             
-            
-# Singleton simulation instance
-simulation_instance = Simulation()

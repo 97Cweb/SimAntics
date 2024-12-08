@@ -1,19 +1,20 @@
 from server import Server
-from simulation import simulation_instance
+from simulation import Simulation
 import time
 
 def main():
     # Initialize server and simulation
-    server = Server()
-    simulation_instance.start(server.outbound_queue)
-
+    
+    simulation = Simulation(x=3,y=3, map_update_interval=0.5)
+    server = Server(simulation)
     try:
         # Start the server
+        simulation.start(server.outbound_queue)
         server.start()
         print("Server and simulation running. Press Ctrl+C to stop.")
 
         # Keep the main thread alive while allowing for interrupt handling
-        while server.is_alive() or simulation_instance.running:
+        while server.is_alive() or simulation.running:
             time.sleep(0.5)  # Sleep to avoid busy waiting
 
     except KeyboardInterrupt:
@@ -21,7 +22,7 @@ def main():
 
     # Stop both server and simulation
     server.stop()
-    simulation_instance.stop()
+    simulation.stop()
 
 if __name__ == "__main__":
     main()

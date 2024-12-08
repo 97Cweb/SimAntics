@@ -6,12 +6,13 @@ import time
 from queue import Queue
 
 from client_connection import ClientConnection
-from simulation import simulation_instance
+
 
 
 class Server(threading.Thread):
-    def __init__(self, host='127.0.0.1', port=65432, udp_port=65433, inactivity_timeout=15):
+    def __init__(self, simulation, host='127.0.0.1', port=65432, udp_port=65433, inactivity_timeout=15):
         super().__init__()
+        self.simulation = simulation
         self.host = host
         self.port = port
         self.udp_port = udp_port
@@ -96,7 +97,7 @@ class Server(threading.Thread):
                 # Send queued updates
                 while not self.outbound_queue.empty():
                     state = self.outbound_queue.get()
-                    self.send_state_to_clients(state, require_ack=True)
+                    self.send_state_to_clients(state, require_ack=False)
 
                 # Retransmit unacknowledged frames
                 current_time = time.time()
@@ -126,7 +127,7 @@ class Server(threading.Thread):
                     self.unacknowledged_frames[client.udp_address][state["frame"]] = (time.time(), state)
 
     def notify_simulation(self, event, username):
-        simulation_instance.command_queue.put({
+        self.simulation.command_queue.put({
             "event":event,
             "username":username
             })
