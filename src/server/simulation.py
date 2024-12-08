@@ -13,10 +13,13 @@ class Simulation:
         self.command_queue = Queue()
         self.lua = LuaRuntime(unpack_returned_tuples=True)  # Initialize Lua runtime
         self.players = {}
+        self.frame_counter = 0
+        
 
-    def start(self):
+    def start(self,server_outbound_queue):
         """Start the simulation loop in a separate thread."""
         self.running = True
+        self.server_outbound_queue = server_outbound_queue
         simulation_thread = threading.Thread(target=self.run, daemon=True)
         simulation_thread.start()
 
@@ -38,9 +41,16 @@ class Simulation:
            print(f"Processing command: {command}")
            self.process_command(command)
            
+        self.frame_counter += 1
+        
+        state = {
+            "frame": self.frame_counter,
+            "players": {username: {"human": player.is_human} for username, player in self.players.items()}
+        }
+        self.server_outbound_queue.put(state)
+           
         """Run one tick of the game simulation."""
         print("Simulating one game tick...")
-        # Add simulation logic here
 
     def process_command(self, command):
         """

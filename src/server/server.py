@@ -3,19 +3,28 @@ import threading
 import json5
 import time
 
+from queue import Queue
+
 from client_connection import ClientConnection
 from simulation import simulation_instance
 
 
 class Server(threading.Thread):
-    def __init__(self, host='127.0.0.1', port=65432, inactivity_timeout=15):
+    def __init__(self, host='127.0.0.1', port=65432, udp_port=65433, inactivity_timeout=15):
         super().__init__()
         self.host = host
         self.port = port
+        self.udp_port = udp_port
+        self.udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.server_socket = None
         self.running = False
         self.connected_clients = {} #username -> client_connection
         self.inactivity_timeout = inactivity_timeout
+        
+        self.outbound_queue = Queue()
+        
+        # Track unacknowledged frames
+        self.unacknowledged_frames = {}  # {client_address: {frame: (timestamp, state)}}
 
     def authenticate(self, credentials):
         """Authenticate client"""
@@ -33,8 +42,10 @@ class Server(threading.Thread):
 
            if self.authenticate(credentials):
                username = credentials.get("username")
+               udp_port = credentials["udp_port"]
                client_connection = self.connected_clients[username] = ClientConnection(username)
-               client_connection.assign_client_socket(client_socket)
+               client_connection.client_socket = client_socket
+               client_connection.udp_address = (client_socket.getpeername()[0], udp_port)
                print(f"client {username} authenticated and connected.")
                client_socket.sendall(json5.dumps({"status": "success", "message": "Authentication succeeded"}).encode('utf-8'))
                # Notify simulation of the new player
@@ -57,6 +68,9 @@ class Server(threading.Thread):
 
         threading.Thread(target=self.heartbeat_monitor, daemon=True).start()
         
+        # Start a thread for UDP broadcasting
+        threading.Thread(target=self.broadcast_updates, daemon=True).start()
+        
         while self.running:
             try:
                 client_socket, client_address = self.server_socket.accept()
@@ -71,7 +85,45 @@ class Server(threading.Thread):
         self.running = False
         if self.server_socket:
             self.server_socket.close()
+        if self.udp_socket:
+            self.udp_socket.close()
         print("Server stopped.")
+        
+    def broadcast_updates(self):
+        """Process the outbound queue and send updates via UDP."""
+        while self.running:
+            try:
+                # Send queued updates
+                while not self.outbound_queue.empty():
+                    state = self.outbound_queue.get()
+                    self.send_state_to_clients(state, require_ack=True)
+
+                # Retransmit unacknowledged frames
+                current_time = time.time()
+                for client_address, frames in list(self.unacknowledged_frames.items()):
+                    for frame, (timestamp, state) in list(frames.items()):
+                        if current_time - timestamp > 1.0:  # Retransmit after 1 second
+                            print(f"Retransmitting frame {frame} to {client_address}")
+                            self.udp_socket.sendto(json5.dumps(state).encode('utf-8'), client_address)
+                            self.unacknowledged_frames[client_address][frame] = (current_time, state)
+
+            except Exception:
+                pass  # Handle timeout or empty queue
+                    
+    def send_state_to_clients(self, state, require_ack=False):
+        """Send simulation state to all clients."""
+        state["require_ack"] = require_ack  # Add acknowledgment flag
+        message = json5.dumps(state).encode('utf-8')
+
+        for client in self.connected_clients.values():
+            if client.udp_address:
+                self.udp_socket.sendto(message, client.udp_address)
+
+                # Track unacknowledged frames if required
+                if require_ack:
+                    if client.udp_address not in self.unacknowledged_frames:
+                        self.unacknowledged_frames[client.udp_address] = {}
+                    self.unacknowledged_frames[client.udp_address][state["frame"]] = (time.time(), state)
 
     def notify_simulation(self, event, username):
         simulation_instance.command_queue.put({
@@ -83,7 +135,6 @@ class Server(threading.Thread):
         """Handle client disconnection."""
         if username in self.connected_clients:
             client_connection = self.connected_clients.pop(username)
-            client_connection.remove_client_socket()
             print(f"Client {username} disconnected.")
 
     def heartbeat_monitor(self):

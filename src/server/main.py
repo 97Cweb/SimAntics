@@ -5,7 +5,7 @@ import time
 def main():
     # Initialize server and simulation
     server = Server()
-    simulation_instance.start()
+    simulation_instance.start(server.outbound_queue)
 
     try:
         # Start the server
