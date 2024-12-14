@@ -14,7 +14,7 @@ def load_lua_scripts(lua_runtime, base_path, mods_path):
     """
     
     lua_scripts = {}
-    
+    mod_list = []
     #load core and replaceable scripts
     for folder in ["core", "replaceable"]:
         folder_path = os.path.join(base_path, folder)
@@ -31,6 +31,7 @@ def load_lua_scripts(lua_runtime, base_path, mods_path):
     #load mod scripts
     if os.path.exists(mods_path):
         for mod_folder in os.listdir(mods_path):
+            mod_list.append(mod_folder)
             mod_path = os.path.join(mods_path, mod_folder)
             if os.path.isdir(mod_path):
                 for folder in ["replaceable"]:
@@ -44,4 +45,4 @@ def load_lua_scripts(lua_runtime, base_path, mods_path):
                                 lua_runtime.execute(script_code)
                                 lua_scripts[name] = lua_runtime.globals()
 
-    return lua_scripts
+    return lua_scripts, mod_list
