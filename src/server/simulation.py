@@ -26,23 +26,14 @@ class Simulation:
         self.last_map_update = time.time()
         
         
-        self.map_update_script = self.lua.eval('''
-    function(in_grid, out_grid, frame)
-        for i, row in python.enumerate(in_grid) do
-            for j, cell in python.enumerate(row) do
-                local cell = in_grid[i][j]
-                if type(cell) == "table" then
-                    print(cell["resources"])
-                    -- Example computation: Copy resources with a cap
-                    out_grid[i][j]["resources"] = math.min(cell["resources"] + 1, 10)
-                end
-                
-            end
-        end
-        return out_grid
-    end
-''')
-
+        try:
+            with open("lua/replaceable/map_update_script.lua", "r") as f:
+                map_update_code = f.read()
+            self.lua.execute(map_update_code)
+            self.map_update_func = self.lua.globals().map_update
+        except FileNotFoundError:
+            raise RuntimeError("Map update script not found in replaceable folder.")
+    
         
 
     def start(self,server_outbound_queue):
@@ -75,8 +66,8 @@ class Simulation:
         
         # Update map
         if current_time - self.last_map_update >= self.map_update_interval:
-            self.update_map()
             self.last_map_update = current_time
+            self.update_map()
             
             state = {
                 "frame": self.frame_counter,
@@ -97,10 +88,10 @@ class Simulation:
         
     def update_map(self):
         """Update the grid state for growth using the Lua script."""
-        print(self.format_grid())
+        #print(self.format_grid())
         
         # Run the Lua script
-        self.grid = self.map_update_script(self.grid, self.temp_grid, self.frame_counter)
+        self.grid = self.map_update_func(self.grid, self.temp_grid, self.frame_counter)
         
 
     def format_grid(self):

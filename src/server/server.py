@@ -35,6 +35,28 @@ class Server(threading.Thread):
         return False
     
     
+    def listen_for_client_messages(self, username):
+        """Continuously listen for messages from the client."""
+        client_connection = self.connected_clients[username]
+        while self.running:
+            try:
+                data = client_connection.client_socket.recv(1024).decode('utf-8')
+                if not data:
+                    break  # Connection closed
+                message = json5.loads(data)
+                if message.get("type") == "keep_alive":
+                    # Update the client's last active time
+                    client_connection.last_active = time.time()
+                    print(f"Keep-alive received from {username}")
+            except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError):
+                break
+            except Exception as e:
+                print(f"Error processing message from {username}: {e}")
+                break
+        # Disconnect client if the loop exits
+        self.disconnect_client(username)
+
+    
     def handle_connection(self, client_socket):
        """Authenticate clients and associate them with players."""
        try:
@@ -51,6 +73,9 @@ class Server(threading.Thread):
                client_socket.sendall(json5.dumps({"status": "success", "message": "Authentication succeeded"}).encode('utf-8'))
                # Notify simulation of the new player
                self.notify_simulation(event="login", username=username)
+               
+               # Start a thread to listen for client messages
+               threading.Thread(target=self.listen_for_client_messages, args=(username,), daemon=True).start()
            else:
                client_socket.sendall(json5.dumps({"status": "error", "message": "Authentication failed"}).encode('utf-8'))
                client_socket.close()
