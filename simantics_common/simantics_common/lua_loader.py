@@ -1,5 +1,4 @@
 import os
-from lupa import LuaRuntime
 
 def load_lua_scripts(lua_runtime, base_path, mods_path):
     """
@@ -20,14 +19,15 @@ def load_lua_scripts(lua_runtime, base_path, mods_path):
     for folder in ["core", "replaceable"]:
         folder_path = os.path.join(base_path, folder)
         if os.path.exists(folder_path):
-            for script_name in os.listdir(folder_path):
-                if script_name.endswith(".lua"):
-                    script_path = os.path.join(folder_path, script_name)
+            for file in os.listdir(folder_path):
+                name, ext = os.path.splitext(file)
+                if ext == ".lua":
+                    script_path = os.path.join(folder_path, file)
                     with open(script_path, "r") as f:
                         script_code = f.read()
                         lua_runtime.execute(script_code)
-                        lua_scripts[script_name] = lua_runtime.globals()
-                        
+                        lua_scripts[name] = lua_runtime.globals()
+
     #load mod scripts
     if os.path.exists(mods_path):
         for mod_folder in os.listdir(mods_path):
@@ -36,11 +36,12 @@ def load_lua_scripts(lua_runtime, base_path, mods_path):
                 for folder in ["replaceable"]:
                     mod_subfolder = os.path.join(mod_path, folder)
                     if os.path.exists(mod_subfolder):
-                        if script_name.endswith(".lua"):
-                            script_path = os.path.join(mod_subfolder, script_name)
+                        name, ext = os.path.splitext(file)
+                        if ext == ".lua":
+                            script_path = os.path.join(mod_subfolder, file)
                             with open(script_path, "r") as f:
                                 script_code = f.read()
                                 lua_runtime.execute(script_code)
-                                lua_scripts[script_name] = lua_runtime.globals()
-    
+                                lua_scripts[name] = lua_runtime.globals()
+
     return lua_scripts
