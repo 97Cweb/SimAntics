@@ -2,9 +2,11 @@ import time
 import threading
 
 from player import Player
+from simantics_common.lua_loader import load_lua_scripts
 
 from lupa import LuaRuntime
 from queue import Queue
+
 
 class Simulation:
     def __init__(self, x=10, y=10, map_update_interval=1.0):
@@ -25,6 +27,14 @@ class Simulation:
         
         self.last_map_update = time.time()
         
+        
+        
+        # Load Lua scripts
+        base_path = "server/lua"
+        mods_path = "server/mods"
+        self.lua_scripts = load_lua_scripts(self.lua, base_path, mods_path)
+        
+        print(self.lua_scripts)
         
         try:
             with open("lua/replaceable/map_update_script.lua", "r") as f:

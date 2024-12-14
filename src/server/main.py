@@ -1,6 +1,6 @@
 from server import Server
 from simulation import Simulation
-from steam_manager import SteamManager
+from simantics_SteamworksWrapper.steamworks_bindings import steam_lib
 
 import time
 

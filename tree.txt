@@ -2,415 +2,802 @@ Folder PATH listing for volume Storage
 Volume serial number is 3019-5DE1
 D:.
 |   .gitignore
-|   setup.py
+|   steam_appid.txt
 |   tree.txt
 |   
 +---build
 |   +---bdist.win-amd64
 |   \---lib
-|       +---client
-|       |       client_test.py
-|       |       __init__.py
-|       |       
-|       +---common
-|       |       __init__.py
-|       |       
-|       +---server
-|       |       client_connection.py
-|       |       main.py
-|       |       player.py
-|       |       server.py
-|       |       simulation.py
-|       |       __init__.py
-|       |       
 |       \---steamworks_wrapper
-|               generate_bindings.py
-|               steamworks_bindings.py
-|               __init__.py
-|               
-+---src
-|   +---client
-|   |       client_test.py
-|   |       __init__.py
-|   |       
+|           |   generate_bindings.py
+|           |   steamworks_bindings.py
+|           |   __init__.py
+|           |   
+|           \---steamworks_sdk_161
+|               \---sdk
+|                   |   Readme.txt
+|                   |   
+|                   +---glmgr
+|                   |       cglmbuffer.cpp
+|                   |       cglmbuffer.h
+|                   |       cglmfbo.cpp
+|                   |       cglmfbo.h
+|                   |       cglmprogram.cpp
+|                   |       cglmprogram.h
+|                   |       cglmquery.cpp
+|                   |       cglmquery.h
+|                   |       cglmtex.cpp
+|                   |       cglmtex.h
+|                   |       dx9asmtogl2.cpp
+|                   |       dx9asmtogl2.h
+|                   |       dxabstract.cpp
+|                   |       dxabstract.h
+|                   |       glmdebug.h
+|                   |       glmdisplay.h
+|                   |       glmgr.cpp
+|                   |       glmgr.h
+|                   |       glmgrbasics.cpp
+|                   |       glmgrbasics.h
+|                   |       glmgrcocoa.mm
+|                   |       glmgrext.cpp
+|                   |       glmgrext.h
+|                   |       imageformat.h
+|                   |       mathlite.cpp
+|                   |       mathlite.h
+|                   |       readme.txt
+|                   |       
+|                   +---public
+|                   |   \---steam
+|                   |       |   isteamapps.h
+|                   |       |   isteamappticket.h
+|                   |       |   isteamclient.h
+|                   |       |   isteamcontroller.h
+|                   |       |   isteamdualsense.h
+|                   |       |   isteamfriends.h
+|                   |       |   isteamgamecoordinator.h
+|                   |       |   isteamgameserver.h
+|                   |       |   isteamgameserverstats.h
+|                   |       |   isteamhtmlsurface.h
+|                   |       |   isteamhttp.h
+|                   |       |   isteaminput.h
+|                   |       |   isteaminventory.h
+|                   |       |   isteammatchmaking.h
+|                   |       |   isteammusic.h
+|                   |       |   isteammusicremote.h
+|                   |       |   isteamnetworking.h
+|                   |       |   isteamnetworkingmessages.h
+|                   |       |   isteamnetworkingsockets.h
+|                   |       |   isteamnetworkingutils.h
+|                   |       |   isteamparentalsettings.h
+|                   |       |   isteamps3overlayrenderer.h
+|                   |       |   isteamremoteplay.h
+|                   |       |   isteamremotestorage.h
+|                   |       |   isteamscreenshots.h
+|                   |       |   isteamtimeline.h
+|                   |       |   isteamugc.h
+|                   |       |   isteamuser.h
+|                   |       |   isteamuserstats.h
+|                   |       |   isteamutils.h
+|                   |       |   isteamvideo.h
+|                   |       |   matchmakingtypes.h
+|                   |       |   steamclientpublic.h
+|                   |       |   steamencryptedappticket.h
+|                   |       |   steamhttpenums.h
+|                   |       |   steamnetworkingfakeip.h
+|                   |       |   steamnetworkingtypes.h
+|                   |       |   steamps3params.h
+|                   |       |   steamtypes.h
+|                   |       |   steamuniverse.h
+|                   |       |   steam_api.h
+|                   |       |   steam_api.json
+|                   |       |   steam_api_common.h
+|                   |       |   steam_api_flat.h
+|                   |       |   steam_api_internal.h
+|                   |       |   steam_gameserver.h
+|                   |       |   
+|                   |       \---lib
+|                   |           +---linux32
+|                   |           |       libsdkencryptedappticket.so
+|                   |           |       
+|                   |           +---linux64
+|                   |           |       libsdkencryptedappticket.so
+|                   |           |       
+|                   |           +---osx
+|                   |           |       libsdkencryptedappticket.dylib
+|                   |           |       
+|                   |           +---win32
+|                   |           |       sdkencryptedappticket.dll
+|                   |           |       sdkencryptedappticket.lib
+|                   |           |       
+|                   |           \---win64
+|                   |                   sdkencryptedappticket64.dll
+|                   |                   sdkencryptedappticket64.lib
+|                   |                   
+|                   +---redistributable_bin
+|                   |   |   steam_api.dll
+|                   |   |   steam_api.lib
+|                   |   |   
+|                   |   +---linux32
+|                   |   |       libsteam_api.so
+|                   |   |       
+|                   |   +---linux64
+|                   |   |       libsteam_api.so
+|                   |   |       
+|                   |   +---osx
+|                   |   |       libsteam_api.dylib
+|                   |   |       
+|                   |   \---win64
+|                   |           steam_api64.dll
+|                   |           steam_api64.lib
+|                   |           
+|                   +---steamworksexample
+|                   |   |   BaseMenu.cpp
+|                   |   |   BaseMenu.h
+|                   |   |   clanchatroom.cpp
+|                   |   |   clanchatroom.h
+|                   |   |   connectingmenu.cpp
+|                   |   |   connectingmenu.h
+|                   |   |   D3D9VRDistort.cso
+|                   |   |   DejaVuSans.ttf
+|                   |   |   DejaVuSans.txt
+|                   |   |   flags.mak
+|                   |   |   Friends.cpp
+|                   |   |   Friends.h
+|                   |   |   GameEngine.h
+|                   |   |   gameengineosx.h
+|                   |   |   gameengineosx.mm
+|                   |   |   gameengineps3.cpp
+|                   |   |   gameengineps3.h
+|                   |   |   gameenginesdl.cpp
+|                   |   |   gameenginesdl.h
+|                   |   |   gameenginewin32.cpp
+|                   |   |   gameenginewin32.h
+|                   |   |   glew.c
+|                   |   |   glstringosx.h
+|                   |   |   glstringosx.mm
+|                   |   |   htmlsurface.cpp
+|                   |   |   htmlsurface.h
+|                   |   |   Inventory.cpp
+|                   |   |   Inventory.h
+|                   |   |   ItemStore.cpp
+|                   |   |   ItemStore.h
+|                   |   |   Leaderboards.cpp
+|                   |   |   Leaderboards.h
+|                   |   |   Lobby.cpp
+|                   |   |   Lobby.h
+|                   |   |   Main.cpp
+|                   |   |   MainMenu.cpp
+|                   |   |   MainMenu.h
+|                   |   |   Makefile
+|                   |   |   Messages.h
+|                   |   |   musicplayer.cpp
+|                   |   |   musicplayer.h
+|                   |   |   OverlayExamples.cpp
+|                   |   |   OverlayExamples.h
+|                   |   |   p2pauth.cpp
+|                   |   |   p2pauth.h
+|                   |   |   PhotonBeam.cpp
+|                   |   |   PhotonBeam.h
+|                   |   |   QuitMenu.cpp
+|                   |   |   QuitMenu.h
+|                   |   |   RemotePlay.cpp
+|                   |   |   RemotePlay.h
+|                   |   |   RemoteStorage.cpp
+|                   |   |   RemoteStorage.h
+|                   |   |   remotestoragesync.cpp
+|                   |   |   remotestoragesync.h
+|                   |   |   richpresenceloc.vdf
+|                   |   |   ServerBrowser.cpp
+|                   |   |   ServerBrowser.h
+|                   |   |   ServerBrowserMenu.h
+|                   |   |   Ship.cpp
+|                   |   |   Ship.h
+|                   |   |   SimpleProtobuf.cpp
+|                   |   |   SimpleProtobuf.h
+|                   |   |   SpaceWar.h
+|                   |   |   SpaceWarClient.cpp
+|                   |   |   SpaceWarClient.h
+|                   |   |   SpaceWarEntity.cpp
+|                   |   |   SpaceWarEntity.h
+|                   |   |   SpaceWarRes.h
+|                   |   |   SpaceWarRes.rc
+|                   |   |   SpaceWarServer.cpp
+|                   |   |   SpaceWarServer.h
+|                   |   |   StarField.cpp
+|                   |   |   StarField.h
+|                   |   |   StatsAndAchievements.cpp
+|                   |   |   StatsAndAchievements.h
+|                   |   |   stdafx.cpp
+|                   |   |   stdafx.h
+|                   |   |   stdafx_ps3.h
+|                   |   |   SteamWorksExample.exe.manifest
+|                   |   |   SteamworksExample.sh
+|                   |   |   SteamworksExample.sln
+|                   |   |   SteamworksExample.vcxproj
+|                   |   |   SteamworksExample.vcxproj.filters
+|                   |   |   steam_controller.vdf
+|                   |   |   steam_input_manifest.vdf
+|                   |   |   Sun.cpp
+|                   |   |   Sun.h
+|                   |   |   timeline.cpp
+|                   |   |   timeline.h
+|                   |   |   VectorEntity.cpp
+|                   |   |   VectorEntity.h
+|                   |   |   voicechat.cpp
+|                   |   |   voicechat.h
+|                   |   |   xbox_controller.vdf
+|                   |   |   
+|                   |   +---debug
+|                   |   |       steam_appid.txt
+|                   |   |       
+|                   |   +---GL
+|                   |   |       glew.h
+|                   |   |       glxew.h
+|                   |   |       wglew.h
+|                   |   |       
+|                   |   +---NEU
+|                   |   |       boxart_NEU.png
+|                   |   |       gameicon_NEU.ico
+|                   |   |       SpaceWar.gdf.xml
+|                   |   |       
+|                   |   +---osx
+|                   |   |       steamworksexample-info.plist
+|                   |   |       steamworksexample.entitlements
+|                   |   |       steam_appid.txt
+|                   |   |       
+|                   |   +---release
+|                   |   |       steam_appid.txt
+|                   |   |       
+|                   |   +---steamworksexample.xcodeproj
+|                   |   |       project.pbxproj
+|                   |   |       
+|                   |   \---win64
+|                   |       +---debug
+|                   |       |       steam_appid.txt
+|                   |       |       
+|                   |       \---release
+|                   |               steam_appid.txt
+|                   |               
+|                   \---tools
+|                       |   ContentPrep.zip
+|                       |   SteamPipeGUI.zip
+|                       |   
+|                       +---codesigning
+|                       |       build_steam_signatures_file.py
+|                       |       steam_modulesigning.public
+|                       |       
+|                       +---ContentBuilder
+|                       |   |   readme.txt
+|                       |   |   run_build.bat
+|                       |   |   
+|                       |   +---builder
+|                       |   |       steamcmd.exe
+|                       |   |       
+|                       |   +---builder_linux
+|                       |   |   |   steamcmd.sh
+|                       |   |   |   
+|                       |   |   \---linux32
+|                       |   |           crashhandler.so
+|                       |   |           libstdc++.so.6
+|                       |   |           steamcmd
+|                       |   |           steamerrorreporter
+|                       |   |           
+|                       |   +---builder_osx
+|                       |   |       crashhandler.dylib
+|                       |   |       steamcmd
+|                       |   |       steamcmd.sh
+|                       |   |       
+|                       |   +---content
+|                       |   |       your game content lives here.txt
+|                       |   |       
+|                       |   +---output
+|                       |   |       for build logs and intermediate files.txt
+|                       |   |       
+|                       |   \---scripts
+|                       |           app_build_1000.vdf
+|                       |           depot_build_1001.vdf
+|                       |           depot_build_1002.vdf
+|                       |           simple_app_build.vdf
+|                       |           
+|                       +---ContentServer
+|                       |   |   mongoose-3.1.exe
+|                       |   |   mongoose-license.txt
+|                       |   |   mongoose.conf
+|                       |   |   
+|                       |   \---htdocs
+|                       |           index.html
+|                       |           
+|                       +---goldmaster
+|                       |   |   project_example.bat
+|                       |   |   sku_project_example.txt
+|                       |   |   
+|                       |   \---disk_assets
+|                       |       |   481_depotcache_1.csd
+|                       |       |   481_depotcache_1.csm
+|                       |       |   autorun.inf
+|                       |       |   icon.ico
+|                       |       |   Setup.exe
+|                       |       |   setup.ini
+|                       |       |   sku.sis
+|                       |       |   splash.tga
+|                       |       |   SteamRetailInstaller.dmg
+|                       |       |   SteamSetup.exe
+|                       |       |   
+|                       |       \---resources
+|                       |               click.wav
+|                       |               eula.rtf
+|                       |               hover.wav
+|                       |               launch.wav
+|                       |               readme.txt
+|                       |               setup.bmp
+|                       |               setup_arabic.ini
+|                       |               setup_brazilian.ini
+|                       |               setup_bulgarian.ini
+|                       |               setup_czech.ini
+|                       |               setup_danish.ini
+|                       |               setup_dutch.ini
+|                       |               setup_english.ini
+|                       |               setup_finnish.ini
+|                       |               setup_french.ini
+|                       |               setup_german.ini
+|                       |               setup_greek.ini
+|                       |               setup_hungarian.ini
+|                       |               setup_italian.ini
+|                       |               setup_japanese.ini
+|                       |               setup_koreana.ini
+|                       |               setup_norwegian.ini
+|                       |               setup_polish.ini
+|                       |               setup_portuguese.ini
+|                       |               setup_romanian.ini
+|                       |               setup_russian.ini
+|                       |               setup_schinese.ini
+|                       |               setup_spanish.ini
+|                       |               setup_swedish.ini
+|                       |               setup_tchinese.ini
+|                       |               setup_thai.ini
+|                       |               setup_turkish.ini
+|                       |               setup_ukrainian.ini
+|                       |               
+|                       \---linux
+|                               README.md
+|                               
++---simantics-common
+|   |   setup.py
+|   |   
+|   +---build
+|   |   +---bdist.win-amd64
+|   |   \---lib
+|   |       \---common
+|   |               lua_loader.py
+|   |               __init__.py
+|   |               
 |   +---common
-|   |       __init__.py
-|   |       
-|   +---server
-|   |   |   client_connection.py
-|   |   |   main.py
-|   |   |   player.py
-|   |   |   server.py
-|   |   |   simulation.py
+|   |   |   lua_loader.py
 |   |   |   __init__.py
 |   |   |   
-|   |   \---__pycache__
-|   |           client_connection.cpython-312.pyc
-|   |           player.cpython-312.pyc
-|   |           server.cpython-312.pyc
-|   |           server.cpython-38.pyc
-|   |           simulation.cpython-312.pyc
+|   |   +---build
+|   |   |   +---bdist.win-amd64
+|   |   |   \---lib
+|   |   |           lua_loader.py
+|   |   |           
+|   |   +---common.egg-info
+|   |   |       dependency_links.txt
+|   |   |       PKG-INFO
+|   |   |       SOURCES.txt
+|   |   |       top_level.txt
+|   |   |       
+|   |   \---simantics_common.egg-info
+|   |           dependency_links.txt
+|   |           PKG-INFO
+|   |           SOURCES.txt
+|   |           top_level.txt
 |   |           
-|   +---simantics.egg-info
-|   |       dependency_links.txt
-|   |       PKG-INFO
-|   |       SOURCES.txt
-|   |       top_level.txt
-|   |       
+|   \---simantics_common.egg-info
+|           dependency_links.txt
+|           PKG-INFO
+|           SOURCES.txt
+|           top_level.txt
+|           
++---simantics-steamworks_wrapper
+|   |   setup.py
+|   |   
 |   \---steamworks_wrapper
 |       |   generate_bindings.py
 |       |   steamworks_bindings.py
 |       |   steamworks_sdk_161.zip
+|       |   tree.txt
 |       |   __init__.py
 |       |   
-|       \---steamworks_sdk_161
-|           \---sdk
-|               |   Readme.txt
-|               |   
-|               +---glmgr
-|               |       cglmbuffer.cpp
-|               |       cglmbuffer.h
-|               |       cglmfbo.cpp
-|               |       cglmfbo.h
-|               |       cglmprogram.cpp
-|               |       cglmprogram.h
-|               |       cglmquery.cpp
-|               |       cglmquery.h
-|               |       cglmtex.cpp
-|               |       cglmtex.h
-|               |       dx9asmtogl2.cpp
-|               |       dx9asmtogl2.h
-|               |       dxabstract.cpp
-|               |       dxabstract.h
-|               |       glmdebug.h
-|               |       glmdisplay.h
-|               |       glmgr.cpp
-|               |       glmgr.h
-|               |       glmgrbasics.cpp
-|               |       glmgrbasics.h
-|               |       glmgrcocoa.mm
-|               |       glmgrext.cpp
-|               |       glmgrext.h
-|               |       imageformat.h
-|               |       mathlite.cpp
-|               |       mathlite.h
-|               |       readme.txt
-|               |       
-|               +---public
-|               |   \---steam
-|               |       |   isteamapps.h
-|               |       |   isteamappticket.h
-|               |       |   isteamclient.h
-|               |       |   isteamcontroller.h
-|               |       |   isteamdualsense.h
-|               |       |   isteamfriends.h
-|               |       |   isteamgamecoordinator.h
-|               |       |   isteamgameserver.h
-|               |       |   isteamgameserverstats.h
-|               |       |   isteamhtmlsurface.h
-|               |       |   isteamhttp.h
-|               |       |   isteaminput.h
-|               |       |   isteaminventory.h
-|               |       |   isteammatchmaking.h
-|               |       |   isteammusic.h
-|               |       |   isteammusicremote.h
-|               |       |   isteamnetworking.h
-|               |       |   isteamnetworkingmessages.h
-|               |       |   isteamnetworkingsockets.h
-|               |       |   isteamnetworkingutils.h
-|               |       |   isteamparentalsettings.h
-|               |       |   isteamps3overlayrenderer.h
-|               |       |   isteamremoteplay.h
-|               |       |   isteamremotestorage.h
-|               |       |   isteamscreenshots.h
-|               |       |   isteamtimeline.h
-|               |       |   isteamugc.h
-|               |       |   isteamuser.h
-|               |       |   isteamuserstats.h
-|               |       |   isteamutils.h
-|               |       |   isteamvideo.h
-|               |       |   matchmakingtypes.h
-|               |       |   steamclientpublic.h
-|               |       |   steamencryptedappticket.h
-|               |       |   steamhttpenums.h
-|               |       |   steamnetworkingfakeip.h
-|               |       |   steamnetworkingtypes.h
-|               |       |   steamps3params.h
-|               |       |   steamtypes.h
-|               |       |   steamuniverse.h
-|               |       |   steam_api.h
-|               |       |   steam_api.json
-|               |       |   steam_api_common.h
-|               |       |   steam_api_flat.h
-|               |       |   steam_api_internal.h
-|               |       |   steam_gameserver.h
-|               |       |   
-|               |       \---lib
-|               |           +---linux32
-|               |           |       libsdkencryptedappticket.so
-|               |           |       
-|               |           +---linux64
-|               |           |       libsdkencryptedappticket.so
-|               |           |       
-|               |           +---osx
-|               |           |       libsdkencryptedappticket.dylib
-|               |           |       
-|               |           +---win32
-|               |           |       sdkencryptedappticket.dll
-|               |           |       sdkencryptedappticket.lib
-|               |           |       
-|               |           \---win64
-|               |                   sdkencryptedappticket64.dll
-|               |                   sdkencryptedappticket64.lib
-|               |                   
-|               +---redistributable_bin
-|               |   |   steam_api.dll
-|               |   |   steam_api.lib
-|               |   |   
-|               |   +---linux32
-|               |   |       libsteam_api.so
-|               |   |       
-|               |   +---linux64
-|               |   |       libsteam_api.so
-|               |   |       
-|               |   +---osx
-|               |   |       libsteam_api.dylib
-|               |   |       
-|               |   \---win64
-|               |           steam_api64.dll
-|               |           steam_api64.lib
-|               |           
-|               +---steamworksexample
-|               |   |   BaseMenu.cpp
-|               |   |   BaseMenu.h
-|               |   |   clanchatroom.cpp
-|               |   |   clanchatroom.h
-|               |   |   connectingmenu.cpp
-|               |   |   connectingmenu.h
-|               |   |   D3D9VRDistort.cso
-|               |   |   DejaVuSans.ttf
-|               |   |   DejaVuSans.txt
-|               |   |   flags.mak
-|               |   |   Friends.cpp
-|               |   |   Friends.h
-|               |   |   GameEngine.h
-|               |   |   gameengineosx.h
-|               |   |   gameengineosx.mm
-|               |   |   gameengineps3.cpp
-|               |   |   gameengineps3.h
-|               |   |   gameenginesdl.cpp
-|               |   |   gameenginesdl.h
-|               |   |   gameenginewin32.cpp
-|               |   |   gameenginewin32.h
-|               |   |   glew.c
-|               |   |   glstringosx.h
-|               |   |   glstringosx.mm
-|               |   |   htmlsurface.cpp
-|               |   |   htmlsurface.h
-|               |   |   Inventory.cpp
-|               |   |   Inventory.h
-|               |   |   ItemStore.cpp
-|               |   |   ItemStore.h
-|               |   |   Leaderboards.cpp
-|               |   |   Leaderboards.h
-|               |   |   Lobby.cpp
-|               |   |   Lobby.h
-|               |   |   Main.cpp
-|               |   |   MainMenu.cpp
-|               |   |   MainMenu.h
-|               |   |   Makefile
-|               |   |   Messages.h
-|               |   |   musicplayer.cpp
-|               |   |   musicplayer.h
-|               |   |   OverlayExamples.cpp
-|               |   |   OverlayExamples.h
-|               |   |   p2pauth.cpp
-|               |   |   p2pauth.h
-|               |   |   PhotonBeam.cpp
-|               |   |   PhotonBeam.h
-|               |   |   QuitMenu.cpp
-|               |   |   QuitMenu.h
-|               |   |   RemotePlay.cpp
-|               |   |   RemotePlay.h
-|               |   |   RemoteStorage.cpp
-|               |   |   RemoteStorage.h
-|               |   |   remotestoragesync.cpp
-|               |   |   remotestoragesync.h
-|               |   |   richpresenceloc.vdf
-|               |   |   ServerBrowser.cpp
-|               |   |   ServerBrowser.h
-|               |   |   ServerBrowserMenu.h
-|               |   |   Ship.cpp
-|               |   |   Ship.h
-|               |   |   SimpleProtobuf.cpp
-|               |   |   SimpleProtobuf.h
-|               |   |   SpaceWar.h
-|               |   |   SpaceWarClient.cpp
-|               |   |   SpaceWarClient.h
-|               |   |   SpaceWarEntity.cpp
-|               |   |   SpaceWarEntity.h
-|               |   |   SpaceWarRes.h
-|               |   |   SpaceWarRes.rc
-|               |   |   SpaceWarServer.cpp
-|               |   |   SpaceWarServer.h
-|               |   |   StarField.cpp
-|               |   |   StarField.h
-|               |   |   StatsAndAchievements.cpp
-|               |   |   StatsAndAchievements.h
-|               |   |   stdafx.cpp
-|               |   |   stdafx.h
-|               |   |   stdafx_ps3.h
-|               |   |   SteamWorksExample.exe.manifest
-|               |   |   SteamworksExample.sh
-|               |   |   SteamworksExample.sln
-|               |   |   SteamworksExample.vcxproj
-|               |   |   SteamworksExample.vcxproj.filters
-|               |   |   steam_controller.vdf
-|               |   |   steam_input_manifest.vdf
-|               |   |   Sun.cpp
-|               |   |   Sun.h
-|               |   |   timeline.cpp
-|               |   |   timeline.h
-|               |   |   VectorEntity.cpp
-|               |   |   VectorEntity.h
-|               |   |   voicechat.cpp
-|               |   |   voicechat.h
-|               |   |   xbox_controller.vdf
-|               |   |   
-|               |   +---debug
-|               |   |       steam_appid.txt
-|               |   |       
-|               |   +---GL
-|               |   |       glew.h
-|               |   |       glxew.h
-|               |   |       wglew.h
-|               |   |       
-|               |   +---NEU
-|               |   |       boxart_NEU.png
-|               |   |       gameicon_NEU.ico
-|               |   |       SpaceWar.gdf.xml
-|               |   |       
-|               |   +---osx
-|               |   |       steamworksexample-info.plist
-|               |   |       steamworksexample.entitlements
-|               |   |       steam_appid.txt
-|               |   |       
-|               |   +---release
-|               |   |       steam_appid.txt
-|               |   |       
-|               |   +---steamworksexample.xcodeproj
-|               |   |       project.pbxproj
-|               |   |       
-|               |   \---win64
-|               |       +---debug
-|               |       |       steam_appid.txt
-|               |       |       
-|               |       \---release
-|               |               steam_appid.txt
-|               |               
-|               \---tools
-|                   |   ContentPrep.zip
-|                   |   SteamPipeGUI.zip
-|                   |   
-|                   +---codesigning
-|                   |       build_steam_signatures_file.py
-|                   |       steam_modulesigning.public
-|                   |       
-|                   +---ContentBuilder
-|                   |   |   readme.txt
-|                   |   |   run_build.bat
-|                   |   |   
-|                   |   +---builder
-|                   |   |       steamcmd.exe
-|                   |   |       
-|                   |   +---builder_linux
-|                   |   |   |   steamcmd.sh
-|                   |   |   |   
-|                   |   |   \---linux32
-|                   |   |           crashhandler.so
-|                   |   |           libstdc++.so.6
-|                   |   |           steamcmd
-|                   |   |           steamerrorreporter
-|                   |   |           
-|                   |   +---builder_osx
-|                   |   |       crashhandler.dylib
-|                   |   |       steamcmd
-|                   |   |       steamcmd.sh
-|                   |   |       
-|                   |   +---content
-|                   |   |       your game content lives here.txt
-|                   |   |       
-|                   |   +---output
-|                   |   |       for build logs and intermediate files.txt
-|                   |   |       
-|                   |   \---scripts
-|                   |           app_build_1000.vdf
-|                   |           depot_build_1001.vdf
-|                   |           depot_build_1002.vdf
-|                   |           simple_app_build.vdf
-|                   |           
-|                   +---ContentServer
-|                   |   |   mongoose-3.1.exe
-|                   |   |   mongoose-license.txt
-|                   |   |   mongoose.conf
-|                   |   |   
-|                   |   \---htdocs
-|                   |           index.html
-|                   |           
-|                   +---goldmaster
-|                   |   |   project_example.bat
-|                   |   |   sku_project_example.txt
-|                   |   |   
-|                   |   \---disk_assets
-|                   |       |   481_depotcache_1.csd
-|                   |       |   481_depotcache_1.csm
-|                   |       |   autorun.inf
-|                   |       |   icon.ico
-|                   |       |   Setup.exe
-|                   |       |   setup.ini
-|                   |       |   sku.sis
-|                   |       |   splash.tga
-|                   |       |   SteamRetailInstaller.dmg
-|                   |       |   SteamSetup.exe
-|                   |       |   
-|                   |       \---resources
-|                   |               click.wav
-|                   |               eula.rtf
-|                   |               hover.wav
-|                   |               launch.wav
-|                   |               readme.txt
-|                   |               setup.bmp
-|                   |               setup_arabic.ini
-|                   |               setup_brazilian.ini
-|                   |               setup_bulgarian.ini
-|                   |               setup_czech.ini
-|                   |               setup_danish.ini
-|                   |               setup_dutch.ini
-|                   |               setup_english.ini
-|                   |               setup_finnish.ini
-|                   |               setup_french.ini
-|                   |               setup_german.ini
-|                   |               setup_greek.ini
-|                   |               setup_hungarian.ini
-|                   |               setup_italian.ini
-|                   |               setup_japanese.ini
-|                   |               setup_koreana.ini
-|                   |               setup_norwegian.ini
-|                   |               setup_polish.ini
-|                   |               setup_portuguese.ini
-|                   |               setup_romanian.ini
-|                   |               setup_russian.ini
-|                   |               setup_schinese.ini
-|                   |               setup_spanish.ini
-|                   |               setup_swedish.ini
-|                   |               setup_tchinese.ini
-|                   |               setup_thai.ini
-|                   |               setup_turkish.ini
-|                   |               setup_ukrainian.ini
-|                   |               
-|                   \---linux
-|                           README.md
-|                           
+|       +---build
+|       |   \---bdist.win-amd64
+|       +---steamworks_sdk_161
+|       |   \---sdk
+|       |       |   Readme.txt
+|       |       |   
+|       |       +---glmgr
+|       |       |       cglmbuffer.cpp
+|       |       |       cglmbuffer.h
+|       |       |       cglmfbo.cpp
+|       |       |       cglmfbo.h
+|       |       |       cglmprogram.cpp
+|       |       |       cglmprogram.h
+|       |       |       cglmquery.cpp
+|       |       |       cglmquery.h
+|       |       |       cglmtex.cpp
+|       |       |       cglmtex.h
+|       |       |       dx9asmtogl2.cpp
+|       |       |       dx9asmtogl2.h
+|       |       |       dxabstract.cpp
+|       |       |       dxabstract.h
+|       |       |       glmdebug.h
+|       |       |       glmdisplay.h
+|       |       |       glmgr.cpp
+|       |       |       glmgr.h
+|       |       |       glmgrbasics.cpp
+|       |       |       glmgrbasics.h
+|       |       |       glmgrcocoa.mm
+|       |       |       glmgrext.cpp
+|       |       |       glmgrext.h
+|       |       |       imageformat.h
+|       |       |       mathlite.cpp
+|       |       |       mathlite.h
+|       |       |       readme.txt
+|       |       |       
+|       |       +---public
+|       |       |   \---steam
+|       |       |       |   isteamapps.h
+|       |       |       |   isteamappticket.h
+|       |       |       |   isteamclient.h
+|       |       |       |   isteamcontroller.h
+|       |       |       |   isteamdualsense.h
+|       |       |       |   isteamfriends.h
+|       |       |       |   isteamgamecoordinator.h
+|       |       |       |   isteamgameserver.h
+|       |       |       |   isteamgameserverstats.h
+|       |       |       |   isteamhtmlsurface.h
+|       |       |       |   isteamhttp.h
+|       |       |       |   isteaminput.h
+|       |       |       |   isteaminventory.h
+|       |       |       |   isteammatchmaking.h
+|       |       |       |   isteammusic.h
+|       |       |       |   isteammusicremote.h
+|       |       |       |   isteamnetworking.h
+|       |       |       |   isteamnetworkingmessages.h
+|       |       |       |   isteamnetworkingsockets.h
+|       |       |       |   isteamnetworkingutils.h
+|       |       |       |   isteamparentalsettings.h
+|       |       |       |   isteamps3overlayrenderer.h
+|       |       |       |   isteamremoteplay.h
+|       |       |       |   isteamremotestorage.h
+|       |       |       |   isteamscreenshots.h
+|       |       |       |   isteamtimeline.h
+|       |       |       |   isteamugc.h
+|       |       |       |   isteamuser.h
+|       |       |       |   isteamuserstats.h
+|       |       |       |   isteamutils.h
+|       |       |       |   isteamvideo.h
+|       |       |       |   matchmakingtypes.h
+|       |       |       |   steamclientpublic.h
+|       |       |       |   steamencryptedappticket.h
+|       |       |       |   steamhttpenums.h
+|       |       |       |   steamnetworkingfakeip.h
+|       |       |       |   steamnetworkingtypes.h
+|       |       |       |   steamps3params.h
+|       |       |       |   steamtypes.h
+|       |       |       |   steamuniverse.h
+|       |       |       |   steam_api.h
+|       |       |       |   steam_api.json
+|       |       |       |   steam_api_common.h
+|       |       |       |   steam_api_flat.h
+|       |       |       |   steam_api_internal.h
+|       |       |       |   steam_gameserver.h
+|       |       |       |   
+|       |       |       \---lib
+|       |       |           +---linux32
+|       |       |           |       libsdkencryptedappticket.so
+|       |       |           |       
+|       |       |           +---linux64
+|       |       |           |       libsdkencryptedappticket.so
+|       |       |           |       
+|       |       |           +---osx
+|       |       |           |       libsdkencryptedappticket.dylib
+|       |       |           |       
+|       |       |           +---win32
+|       |       |           |       sdkencryptedappticket.dll
+|       |       |           |       sdkencryptedappticket.lib
+|       |       |           |       
+|       |       |           \---win64
+|       |       |                   sdkencryptedappticket64.dll
+|       |       |                   sdkencryptedappticket64.lib
+|       |       |                   
+|       |       +---redistributable_bin
+|       |       |   |   steam_api.dll
+|       |       |   |   steam_api.lib
+|       |       |   |   
+|       |       |   +---linux32
+|       |       |   |       libsteam_api.so
+|       |       |   |       
+|       |       |   +---linux64
+|       |       |   |       libsteam_api.so
+|       |       |   |       
+|       |       |   +---osx
+|       |       |   |       libsteam_api.dylib
+|       |       |   |       
+|       |       |   \---win64
+|       |       |           steam_api64.dll
+|       |       |           steam_api64.lib
+|       |       |           
+|       |       +---steamworksexample
+|       |       |   |   BaseMenu.cpp
+|       |       |   |   BaseMenu.h
+|       |       |   |   clanchatroom.cpp
+|       |       |   |   clanchatroom.h
+|       |       |   |   connectingmenu.cpp
+|       |       |   |   connectingmenu.h
+|       |       |   |   D3D9VRDistort.cso
+|       |       |   |   DejaVuSans.ttf
+|       |       |   |   DejaVuSans.txt
+|       |       |   |   flags.mak
+|       |       |   |   Friends.cpp
+|       |       |   |   Friends.h
+|       |       |   |   GameEngine.h
+|       |       |   |   gameengineosx.h
+|       |       |   |   gameengineosx.mm
+|       |       |   |   gameengineps3.cpp
+|       |       |   |   gameengineps3.h
+|       |       |   |   gameenginesdl.cpp
+|       |       |   |   gameenginesdl.h
+|       |       |   |   gameenginewin32.cpp
+|       |       |   |   gameenginewin32.h
+|       |       |   |   glew.c
+|       |       |   |   glstringosx.h
+|       |       |   |   glstringosx.mm
+|       |       |   |   htmlsurface.cpp
+|       |       |   |   htmlsurface.h
+|       |       |   |   Inventory.cpp
+|       |       |   |   Inventory.h
+|       |       |   |   ItemStore.cpp
+|       |       |   |   ItemStore.h
+|       |       |   |   Leaderboards.cpp
+|       |       |   |   Leaderboards.h
+|       |       |   |   Lobby.cpp
+|       |       |   |   Lobby.h
+|       |       |   |   Main.cpp
+|       |       |   |   MainMenu.cpp
+|       |       |   |   MainMenu.h
+|       |       |   |   Makefile
+|       |       |   |   Messages.h
+|       |       |   |   musicplayer.cpp
+|       |       |   |   musicplayer.h
+|       |       |   |   OverlayExamples.cpp
+|       |       |   |   OverlayExamples.h
+|       |       |   |   p2pauth.cpp
+|       |       |   |   p2pauth.h
+|       |       |   |   PhotonBeam.cpp
+|       |       |   |   PhotonBeam.h
+|       |       |   |   QuitMenu.cpp
+|       |       |   |   QuitMenu.h
+|       |       |   |   RemotePlay.cpp
+|       |       |   |   RemotePlay.h
+|       |       |   |   RemoteStorage.cpp
+|       |       |   |   RemoteStorage.h
+|       |       |   |   remotestoragesync.cpp
+|       |       |   |   remotestoragesync.h
+|       |       |   |   richpresenceloc.vdf
+|       |       |   |   ServerBrowser.cpp
+|       |       |   |   ServerBrowser.h
+|       |       |   |   ServerBrowserMenu.h
+|       |       |   |   Ship.cpp
+|       |       |   |   Ship.h
+|       |       |   |   SimpleProtobuf.cpp
+|       |       |   |   SimpleProtobuf.h
+|       |       |   |   SpaceWar.h
+|       |       |   |   SpaceWarClient.cpp
+|       |       |   |   SpaceWarClient.h
+|       |       |   |   SpaceWarEntity.cpp
+|       |       |   |   SpaceWarEntity.h
+|       |       |   |   SpaceWarRes.h
+|       |       |   |   SpaceWarRes.rc
+|       |       |   |   SpaceWarServer.cpp
+|       |       |   |   SpaceWarServer.h
+|       |       |   |   StarField.cpp
+|       |       |   |   StarField.h
+|       |       |   |   StatsAndAchievements.cpp
+|       |       |   |   StatsAndAchievements.h
+|       |       |   |   stdafx.cpp
+|       |       |   |   stdafx.h
+|       |       |   |   stdafx_ps3.h
+|       |       |   |   SteamWorksExample.exe.manifest
+|       |       |   |   SteamworksExample.sh
+|       |       |   |   SteamworksExample.sln
+|       |       |   |   SteamworksExample.vcxproj
+|       |       |   |   SteamworksExample.vcxproj.filters
+|       |       |   |   steam_controller.vdf
+|       |       |   |   steam_input_manifest.vdf
+|       |       |   |   Sun.cpp
+|       |       |   |   Sun.h
+|       |       |   |   timeline.cpp
+|       |       |   |   timeline.h
+|       |       |   |   VectorEntity.cpp
+|       |       |   |   VectorEntity.h
+|       |       |   |   voicechat.cpp
+|       |       |   |   voicechat.h
+|       |       |   |   xbox_controller.vdf
+|       |       |   |   
+|       |       |   +---debug
+|       |       |   |       steam_appid.txt
+|       |       |   |       
+|       |       |   +---GL
+|       |       |   |       glew.h
+|       |       |   |       glxew.h
+|       |       |   |       wglew.h
+|       |       |   |       
+|       |       |   +---NEU
+|       |       |   |       boxart_NEU.png
+|       |       |   |       gameicon_NEU.ico
+|       |       |   |       SpaceWar.gdf.xml
+|       |       |   |       
+|       |       |   +---osx
+|       |       |   |       steamworksexample-info.plist
+|       |       |   |       steamworksexample.entitlements
+|       |       |   |       steam_appid.txt
+|       |       |   |       
+|       |       |   +---release
+|       |       |   |       steam_appid.txt
+|       |       |   |       
+|       |       |   +---steamworksexample.xcodeproj
+|       |       |   |       project.pbxproj
+|       |       |   |       
+|       |       |   \---win64
+|       |       |       +---debug
+|       |       |       |       steam_appid.txt
+|       |       |       |       
+|       |       |       \---release
+|       |       |               steam_appid.txt
+|       |       |               
+|       |       \---tools
+|       |           |   ContentPrep.zip
+|       |           |   SteamPipeGUI.zip
+|       |           |   
+|       |           +---codesigning
+|       |           |       build_steam_signatures_file.py
+|       |           |       steam_modulesigning.public
+|       |           |       
+|       |           +---ContentBuilder
+|       |           |   |   readme.txt
+|       |           |   |   run_build.bat
+|       |           |   |   
+|       |           |   +---builder
+|       |           |   |       steamcmd.exe
+|       |           |   |       
+|       |           |   +---builder_linux
+|       |           |   |   |   steamcmd.sh
+|       |           |   |   |   
+|       |           |   |   \---linux32
+|       |           |   |           crashhandler.so
+|       |           |   |           libstdc++.so.6
+|       |           |   |           steamcmd
+|       |           |   |           steamerrorreporter
+|       |           |   |           
+|       |           |   +---builder_osx
+|       |           |   |       crashhandler.dylib
+|       |           |   |       steamcmd
+|       |           |   |       steamcmd.sh
+|       |           |   |       
+|       |           |   +---content
+|       |           |   |       your game content lives here.txt
+|       |           |   |       
+|       |           |   +---output
+|       |           |   |       for build logs and intermediate files.txt
+|       |           |   |       
+|       |           |   \---scripts
+|       |           |           app_build_1000.vdf
+|       |           |           depot_build_1001.vdf
+|       |           |           depot_build_1002.vdf
+|       |           |           simple_app_build.vdf
+|       |           |           
+|       |           +---ContentServer
+|       |           |   |   mongoose-3.1.exe
+|       |           |   |   mongoose-license.txt
+|       |           |   |   mongoose.conf
+|       |           |   |   
+|       |           |   \---htdocs
+|       |           |           index.html
+|       |           |           
+|       |           +---goldmaster
+|       |           |   |   project_example.bat
+|       |           |   |   sku_project_example.txt
+|       |           |   |   
+|       |           |   \---disk_assets
+|       |           |       |   481_depotcache_1.csd
+|       |           |       |   481_depotcache_1.csm
+|       |           |       |   autorun.inf
+|       |           |       |   icon.ico
+|       |           |       |   Setup.exe
+|       |           |       |   setup.ini
+|       |           |       |   sku.sis
+|       |           |       |   splash.tga
+|       |           |       |   SteamRetailInstaller.dmg
+|       |           |       |   SteamSetup.exe
+|       |           |       |   
+|       |           |       \---resources
+|       |           |               click.wav
+|       |           |               eula.rtf
+|       |           |               hover.wav
+|       |           |               launch.wav
+|       |           |               readme.txt
+|       |           |               setup.bmp
+|       |           |               setup_arabic.ini
+|       |           |               setup_brazilian.ini
+|       |           |               setup_bulgarian.ini
+|       |           |               setup_czech.ini
+|       |           |               setup_danish.ini
+|       |           |               setup_dutch.ini
+|       |           |               setup_english.ini
+|       |           |               setup_finnish.ini
+|       |           |               setup_french.ini
+|       |           |               setup_german.ini
+|       |           |               setup_greek.ini
+|       |           |               setup_hungarian.ini
+|       |           |               setup_italian.ini
+|       |           |               setup_japanese.ini
+|       |           |               setup_koreana.ini
+|       |           |               setup_norwegian.ini
+|       |           |               setup_polish.ini
+|       |           |               setup_portuguese.ini
+|       |           |               setup_romanian.ini
+|       |           |               setup_russian.ini
+|       |           |               setup_schinese.ini
+|       |           |               setup_spanish.ini
+|       |           |               setup_swedish.ini
+|       |           |               setup_tchinese.ini
+|       |           |               setup_thai.ini
+|       |           |               setup_turkish.ini
+|       |           |               setup_ukrainian.ini
+|       |           |               
+|       |           \---linux
+|       |                   README.md
+|       |                   
+|       \---steamworks_wrapper.egg-info
+|               dependency_links.txt
+|               PKG-INFO
+|               SOURCES.txt
+|               top_level.txt
+|               
++---src
+|   +---client
+|   |   |   client_test.py
+|   |   |   __init__.py
+|   |   |   
+|   |   \---mods
+|   \---server
+|       |   client_connection.py
+|       |   main.py
+|       |   player.py
+|       |   server.py
+|       |   simulation.py
+|       |   steam_manager.py
+|       |   __init__.py
+|       |   
+|       +---lua
+|       |   +---core
+|       |   |       base_ant.lua
+|       |   |       
+|       |   \---replaceable
+|       |           map_update_script.lua
+|       |           
+|       +---mods
+|       |   \---first mod
+|       |           hello lua.lua
+|       |           
+|       \---__pycache__
+|               client_connection.cpython-312.pyc
+|               player.cpython-312.pyc
+|               server.cpython-312.pyc
+|               server.cpython-38.pyc
+|               simulation.cpython-312.pyc
+|               steam_manager.cpython-312.pyc
+|               
 \---venv
     |   pyvenv.cfg
     |   
@@ -3114,6 +3501,14 @@ D:.
     |       |   |   
     |       |   \---licenses
     |       |           LICENSE
+    |       |           
+    |       +---common
+    |       |   |   lua_loader.py
+    |       |   |   __init__.py
+    |       |   |   
+    |       |   \---__pycache__
+    |       |           lua_loader.cpython-312.pyc
+    |       |           __init__.cpython-312.pyc
     |       |           
     |       +---cookiecutter
     |       |   |   cli.py
@@ -20574,6 +20969,15 @@ D:.
     |       |       top_level.txt
     |       |       WHEEL
     |       |       
+    |       +---simantics_common-0.1.0.dist-info
+    |       |       direct_url.json
+    |       |       INSTALLER
+    |       |       METADATA
+    |       |       RECORD
+    |       |       REQUESTED
+    |       |       top_level.txt
+    |       |       WHEEL
+    |       |       
     |       +---six-1.16.0.dist-info
     |       |       INSTALLER
     |       |       LICENSE
@@ -27369,6 +27773,376 @@ D:.
     |       |       top_level.txt
     |       |       WHEEL
     |       |       
+    |       +---steamworks_wrapper
+    |       |   |   generate_bindings.py
+    |       |   |   steamworks_bindings.py
+    |       |   |   __init__.py
+    |       |   |   
+    |       |   +---steamworks_sdk_161
+    |       |   |   \---sdk
+    |       |   |       |   Readme.txt
+    |       |   |       |   
+    |       |   |       +---glmgr
+    |       |   |       |       cglmbuffer.cpp
+    |       |   |       |       cglmbuffer.h
+    |       |   |       |       cglmfbo.cpp
+    |       |   |       |       cglmfbo.h
+    |       |   |       |       cglmprogram.cpp
+    |       |   |       |       cglmprogram.h
+    |       |   |       |       cglmquery.cpp
+    |       |   |       |       cglmquery.h
+    |       |   |       |       cglmtex.cpp
+    |       |   |       |       cglmtex.h
+    |       |   |       |       dx9asmtogl2.cpp
+    |       |   |       |       dx9asmtogl2.h
+    |       |   |       |       dxabstract.cpp
+    |       |   |       |       dxabstract.h
+    |       |   |       |       glmdebug.h
+    |       |   |       |       glmdisplay.h
+    |       |   |       |       glmgr.cpp
+    |       |   |       |       glmgr.h
+    |       |   |       |       glmgrbasics.cpp
+    |       |   |       |       glmgrbasics.h
+    |       |   |       |       glmgrcocoa.mm
+    |       |   |       |       glmgrext.cpp
+    |       |   |       |       glmgrext.h
+    |       |   |       |       imageformat.h
+    |       |   |       |       mathlite.cpp
+    |       |   |       |       mathlite.h
+    |       |   |       |       readme.txt
+    |       |   |       |       
+    |       |   |       +---public
+    |       |   |       |   \---steam
+    |       |   |       |       |   isteamapps.h
+    |       |   |       |       |   isteamappticket.h
+    |       |   |       |       |   isteamclient.h
+    |       |   |       |       |   isteamcontroller.h
+    |       |   |       |       |   isteamdualsense.h
+    |       |   |       |       |   isteamfriends.h
+    |       |   |       |       |   isteamgamecoordinator.h
+    |       |   |       |       |   isteamgameserver.h
+    |       |   |       |       |   isteamgameserverstats.h
+    |       |   |       |       |   isteamhtmlsurface.h
+    |       |   |       |       |   isteamhttp.h
+    |       |   |       |       |   isteaminput.h
+    |       |   |       |       |   isteaminventory.h
+    |       |   |       |       |   isteammatchmaking.h
+    |       |   |       |       |   isteammusic.h
+    |       |   |       |       |   isteammusicremote.h
+    |       |   |       |       |   isteamnetworking.h
+    |       |   |       |       |   isteamnetworkingmessages.h
+    |       |   |       |       |   isteamnetworkingsockets.h
+    |       |   |       |       |   isteamnetworkingutils.h
+    |       |   |       |       |   isteamparentalsettings.h
+    |       |   |       |       |   isteamps3overlayrenderer.h
+    |       |   |       |       |   isteamremoteplay.h
+    |       |   |       |       |   isteamremotestorage.h
+    |       |   |       |       |   isteamscreenshots.h
+    |       |   |       |       |   isteamtimeline.h
+    |       |   |       |       |   isteamugc.h
+    |       |   |       |       |   isteamuser.h
+    |       |   |       |       |   isteamuserstats.h
+    |       |   |       |       |   isteamutils.h
+    |       |   |       |       |   isteamvideo.h
+    |       |   |       |       |   matchmakingtypes.h
+    |       |   |       |       |   steamclientpublic.h
+    |       |   |       |       |   steamencryptedappticket.h
+    |       |   |       |       |   steamhttpenums.h
+    |       |   |       |       |   steamnetworkingfakeip.h
+    |       |   |       |       |   steamnetworkingtypes.h
+    |       |   |       |       |   steamps3params.h
+    |       |   |       |       |   steamtypes.h
+    |       |   |       |       |   steamuniverse.h
+    |       |   |       |       |   steam_api.h
+    |       |   |       |       |   steam_api.json
+    |       |   |       |       |   steam_api_common.h
+    |       |   |       |       |   steam_api_flat.h
+    |       |   |       |       |   steam_api_internal.h
+    |       |   |       |       |   steam_gameserver.h
+    |       |   |       |       |   
+    |       |   |       |       \---lib
+    |       |   |       |           +---linux32
+    |       |   |       |           |       libsdkencryptedappticket.so
+    |       |   |       |           |       
+    |       |   |       |           +---linux64
+    |       |   |       |           |       libsdkencryptedappticket.so
+    |       |   |       |           |       
+    |       |   |       |           +---osx
+    |       |   |       |           |       libsdkencryptedappticket.dylib
+    |       |   |       |           |       
+    |       |   |       |           +---win32
+    |       |   |       |           |       sdkencryptedappticket.dll
+    |       |   |       |           |       sdkencryptedappticket.lib
+    |       |   |       |           |       
+    |       |   |       |           \---win64
+    |       |   |       |                   sdkencryptedappticket64.dll
+    |       |   |       |                   sdkencryptedappticket64.lib
+    |       |   |       |                   
+    |       |   |       +---redistributable_bin
+    |       |   |       |   |   steam_api.dll
+    |       |   |       |   |   steam_api.lib
+    |       |   |       |   |   
+    |       |   |       |   +---linux32
+    |       |   |       |   |       libsteam_api.so
+    |       |   |       |   |       
+    |       |   |       |   +---linux64
+    |       |   |       |   |       libsteam_api.so
+    |       |   |       |   |       
+    |       |   |       |   +---osx
+    |       |   |       |   |       libsteam_api.dylib
+    |       |   |       |   |       
+    |       |   |       |   \---win64
+    |       |   |       |           steam_api64.dll
+    |       |   |       |           steam_api64.lib
+    |       |   |       |           
+    |       |   |       +---steamworksexample
+    |       |   |       |   |   BaseMenu.cpp
+    |       |   |       |   |   BaseMenu.h
+    |       |   |       |   |   clanchatroom.cpp
+    |       |   |       |   |   clanchatroom.h
+    |       |   |       |   |   connectingmenu.cpp
+    |       |   |       |   |   connectingmenu.h
+    |       |   |       |   |   D3D9VRDistort.cso
+    |       |   |       |   |   DejaVuSans.ttf
+    |       |   |       |   |   DejaVuSans.txt
+    |       |   |       |   |   flags.mak
+    |       |   |       |   |   Friends.cpp
+    |       |   |       |   |   Friends.h
+    |       |   |       |   |   GameEngine.h
+    |       |   |       |   |   gameengineosx.h
+    |       |   |       |   |   gameengineosx.mm
+    |       |   |       |   |   gameengineps3.cpp
+    |       |   |       |   |   gameengineps3.h
+    |       |   |       |   |   gameenginesdl.cpp
+    |       |   |       |   |   gameenginesdl.h
+    |       |   |       |   |   gameenginewin32.cpp
+    |       |   |       |   |   gameenginewin32.h
+    |       |   |       |   |   glew.c
+    |       |   |       |   |   glstringosx.h
+    |       |   |       |   |   glstringosx.mm
+    |       |   |       |   |   htmlsurface.cpp
+    |       |   |       |   |   htmlsurface.h
+    |       |   |       |   |   Inventory.cpp
+    |       |   |       |   |   Inventory.h
+    |       |   |       |   |   ItemStore.cpp
+    |       |   |       |   |   ItemStore.h
+    |       |   |       |   |   Leaderboards.cpp
+    |       |   |       |   |   Leaderboards.h
+    |       |   |       |   |   Lobby.cpp
+    |       |   |       |   |   Lobby.h
+    |       |   |       |   |   Main.cpp
+    |       |   |       |   |   MainMenu.cpp
+    |       |   |       |   |   MainMenu.h
+    |       |   |       |   |   Makefile
+    |       |   |       |   |   Messages.h
+    |       |   |       |   |   musicplayer.cpp
+    |       |   |       |   |   musicplayer.h
+    |       |   |       |   |   OverlayExamples.cpp
+    |       |   |       |   |   OverlayExamples.h
+    |       |   |       |   |   p2pauth.cpp
+    |       |   |       |   |   p2pauth.h
+    |       |   |       |   |   PhotonBeam.cpp
+    |       |   |       |   |   PhotonBeam.h
+    |       |   |       |   |   QuitMenu.cpp
+    |       |   |       |   |   QuitMenu.h
+    |       |   |       |   |   RemotePlay.cpp
+    |       |   |       |   |   RemotePlay.h
+    |       |   |       |   |   RemoteStorage.cpp
+    |       |   |       |   |   RemoteStorage.h
+    |       |   |       |   |   remotestoragesync.cpp
+    |       |   |       |   |   remotestoragesync.h
+    |       |   |       |   |   richpresenceloc.vdf
+    |       |   |       |   |   ServerBrowser.cpp
+    |       |   |       |   |   ServerBrowser.h
+    |       |   |       |   |   ServerBrowserMenu.h
+    |       |   |       |   |   Ship.cpp
+    |       |   |       |   |   Ship.h
+    |       |   |       |   |   SimpleProtobuf.cpp
+    |       |   |       |   |   SimpleProtobuf.h
+    |       |   |       |   |   SpaceWar.h
+    |       |   |       |   |   SpaceWarClient.cpp
+    |       |   |       |   |   SpaceWarClient.h
+    |       |   |       |   |   SpaceWarEntity.cpp
+    |       |   |       |   |   SpaceWarEntity.h
+    |       |   |       |   |   SpaceWarRes.h
+    |       |   |       |   |   SpaceWarRes.rc
+    |       |   |       |   |   SpaceWarServer.cpp
+    |       |   |       |   |   SpaceWarServer.h
+    |       |   |       |   |   StarField.cpp
+    |       |   |       |   |   StarField.h
+    |       |   |       |   |   StatsAndAchievements.cpp
+    |       |   |       |   |   StatsAndAchievements.h
+    |       |   |       |   |   stdafx.cpp
+    |       |   |       |   |   stdafx.h
+    |       |   |       |   |   stdafx_ps3.h
+    |       |   |       |   |   SteamWorksExample.exe.manifest
+    |       |   |       |   |   SteamworksExample.sh
+    |       |   |       |   |   SteamworksExample.sln
+    |       |   |       |   |   SteamworksExample.vcxproj
+    |       |   |       |   |   SteamworksExample.vcxproj.filters
+    |       |   |       |   |   steam_controller.vdf
+    |       |   |       |   |   steam_input_manifest.vdf
+    |       |   |       |   |   Sun.cpp
+    |       |   |       |   |   Sun.h
+    |       |   |       |   |   timeline.cpp
+    |       |   |       |   |   timeline.h
+    |       |   |       |   |   VectorEntity.cpp
+    |       |   |       |   |   VectorEntity.h
+    |       |   |       |   |   voicechat.cpp
+    |       |   |       |   |   voicechat.h
+    |       |   |       |   |   xbox_controller.vdf
+    |       |   |       |   |   
+    |       |   |       |   +---debug
+    |       |   |       |   |       steam_appid.txt
+    |       |   |       |   |       
+    |       |   |       |   +---GL
+    |       |   |       |   |       glew.h
+    |       |   |       |   |       glxew.h
+    |       |   |       |   |       wglew.h
+    |       |   |       |   |       
+    |       |   |       |   +---NEU
+    |       |   |       |   |       boxart_NEU.png
+    |       |   |       |   |       gameicon_NEU.ico
+    |       |   |       |   |       SpaceWar.gdf.xml
+    |       |   |       |   |       
+    |       |   |       |   +---osx
+    |       |   |       |   |       steamworksexample-info.plist
+    |       |   |       |   |       steamworksexample.entitlements
+    |       |   |       |   |       steam_appid.txt
+    |       |   |       |   |       
+    |       |   |       |   +---release
+    |       |   |       |   |       steam_appid.txt
+    |       |   |       |   |       
+    |       |   |       |   +---steamworksexample.xcodeproj
+    |       |   |       |   |       project.pbxproj
+    |       |   |       |   |       
+    |       |   |       |   \---win64
+    |       |   |       |       +---debug
+    |       |   |       |       |       steam_appid.txt
+    |       |   |       |       |       
+    |       |   |       |       \---release
+    |       |   |       |               steam_appid.txt
+    |       |   |       |               
+    |       |   |       \---tools
+    |       |   |           |   ContentPrep.zip
+    |       |   |           |   SteamPipeGUI.zip
+    |       |   |           |   
+    |       |   |           +---codesigning
+    |       |   |           |   |   build_steam_signatures_file.py
+    |       |   |           |   |   steam_modulesigning.public
+    |       |   |           |   |   
+    |       |   |           |   \---__pycache__
+    |       |   |           |           build_steam_signatures_file.cpython-312.pyc
+    |       |   |           |           
+    |       |   |           +---ContentBuilder
+    |       |   |           |   |   readme.txt
+    |       |   |           |   |   run_build.bat
+    |       |   |           |   |   
+    |       |   |           |   +---builder
+    |       |   |           |   |       steamcmd.exe
+    |       |   |           |   |       
+    |       |   |           |   +---builder_linux
+    |       |   |           |   |   |   steamcmd.sh
+    |       |   |           |   |   |   
+    |       |   |           |   |   \---linux32
+    |       |   |           |   |           crashhandler.so
+    |       |   |           |   |           libstdc++.so.6
+    |       |   |           |   |           steamcmd
+    |       |   |           |   |           steamerrorreporter
+    |       |   |           |   |           
+    |       |   |           |   +---builder_osx
+    |       |   |           |   |       crashhandler.dylib
+    |       |   |           |   |       steamcmd
+    |       |   |           |   |       steamcmd.sh
+    |       |   |           |   |       
+    |       |   |           |   +---content
+    |       |   |           |   |       your game content lives here.txt
+    |       |   |           |   |       
+    |       |   |           |   +---output
+    |       |   |           |   |       for build logs and intermediate files.txt
+    |       |   |           |   |       
+    |       |   |           |   \---scripts
+    |       |   |           |           app_build_1000.vdf
+    |       |   |           |           depot_build_1001.vdf
+    |       |   |           |           depot_build_1002.vdf
+    |       |   |           |           simple_app_build.vdf
+    |       |   |           |           
+    |       |   |           +---ContentServer
+    |       |   |           |   |   mongoose-3.1.exe
+    |       |   |           |   |   mongoose-license.txt
+    |       |   |           |   |   mongoose.conf
+    |       |   |           |   |   
+    |       |   |           |   \---htdocs
+    |       |   |           |           index.html
+    |       |   |           |           
+    |       |   |           +---goldmaster
+    |       |   |           |   |   project_example.bat
+    |       |   |           |   |   sku_project_example.txt
+    |       |   |           |   |   
+    |       |   |           |   \---disk_assets
+    |       |   |           |       |   481_depotcache_1.csd
+    |       |   |           |       |   481_depotcache_1.csm
+    |       |   |           |       |   autorun.inf
+    |       |   |           |       |   icon.ico
+    |       |   |           |       |   Setup.exe
+    |       |   |           |       |   setup.ini
+    |       |   |           |       |   sku.sis
+    |       |   |           |       |   splash.tga
+    |       |   |           |       |   SteamRetailInstaller.dmg
+    |       |   |           |       |   SteamSetup.exe
+    |       |   |           |       |   
+    |       |   |           |       \---resources
+    |       |   |           |               click.wav
+    |       |   |           |               eula.rtf
+    |       |   |           |               hover.wav
+    |       |   |           |               launch.wav
+    |       |   |           |               readme.txt
+    |       |   |           |               setup.bmp
+    |       |   |           |               setup_arabic.ini
+    |       |   |           |               setup_brazilian.ini
+    |       |   |           |               setup_bulgarian.ini
+    |       |   |           |               setup_czech.ini
+    |       |   |           |               setup_danish.ini
+    |       |   |           |               setup_dutch.ini
+    |       |   |           |               setup_english.ini
+    |       |   |           |               setup_finnish.ini
+    |       |   |           |               setup_french.ini
+    |       |   |           |               setup_german.ini
+    |       |   |           |               setup_greek.ini
+    |       |   |           |               setup_hungarian.ini
+    |       |   |           |               setup_italian.ini
+    |       |   |           |               setup_japanese.ini
+    |       |   |           |               setup_koreana.ini
+    |       |   |           |               setup_norwegian.ini
+    |       |   |           |               setup_polish.ini
+    |       |   |           |               setup_portuguese.ini
+    |       |   |           |               setup_romanian.ini
+    |       |   |           |               setup_russian.ini
+    |       |   |           |               setup_schinese.ini
+    |       |   |           |               setup_spanish.ini
+    |       |   |           |               setup_swedish.ini
+    |       |   |           |               setup_tchinese.ini
+    |       |   |           |               setup_thai.ini
+    |       |   |           |               setup_turkish.ini
+    |       |   |           |               setup_ukrainian.ini
+    |       |   |           |               
+    |       |   |           \---linux
+    |       |   |                   README.md
+    |       |   |                   
+    |       |   \---__pycache__
+    |       |           generate_bindings.cpython-312.pyc
+    |       |           steamworks_bindings.cpython-312.pyc
+    |       |           __init__.cpython-312.pyc
+    |       |           
+    |       +---steamworks_wrapper-0.1.0.dist-info
+    |       |       direct_url.json
+    |       |       INSTALLER
+    |       |       METADATA
+    |       |       RECORD
+    |       |       REQUESTED
+    |       |       top_level.txt
+    |       |       WHEEL
+    |       |       
     |       +---superqt
     |       |   |   py.typed
     |       |   |   __init__.py
@@ -29831,25 +30605,32 @@ D:.
     |       |   \---__pycache__
     |       |           __init__.cpython-312.pyc
     |       |           
-    |       \---__pycache__
-    |               autopep8.cpython-312.pyc
-    |               decorator.cpython-312.pyc
-    |               imagesize.cpython-312.pyc
-    |               inflection.cpython-312.pyc
-    |               ipykernel_launcher.cpython-312.pyc
-    |               jupyter.cpython-312.pyc
-    |               mccabe.cpython-312.pyc
-    |               mypy_extensions.cpython-312.pyc
-    |               nest_asyncio.cpython-312.pyc
-    |               pandocfilters.cpython-312.pyc
-    |               pickleshare.cpython-312.pyc
-    |               pycodestyle.cpython-312.pyc
-    |               pylint_venv.cpython-312.pyc
-    |               pythoncom.cpython-312.pyc
-    |               six.cpython-312.pyc
-    |               typing_extensions.cpython-312.pyc
-    |               _black_version.cpython-312.pyc
-    |               
+    |       +---__pycache__
+    |       |       autopep8.cpython-312.pyc
+    |       |       decorator.cpython-312.pyc
+    |       |       imagesize.cpython-312.pyc
+    |       |       inflection.cpython-312.pyc
+    |       |       ipykernel_launcher.cpython-312.pyc
+    |       |       jupyter.cpython-312.pyc
+    |       |       mccabe.cpython-312.pyc
+    |       |       mypy_extensions.cpython-312.pyc
+    |       |       nest_asyncio.cpython-312.pyc
+    |       |       pandocfilters.cpython-312.pyc
+    |       |       pickleshare.cpython-312.pyc
+    |       |       pycodestyle.cpython-312.pyc
+    |       |       pylint_venv.cpython-312.pyc
+    |       |       pythoncom.cpython-312.pyc
+    |       |       six.cpython-312.pyc
+    |       |       typing_extensions.cpython-312.pyc
+    |       |       _black_version.cpython-312.pyc
+    |       |       
+    |       \---~teamworks_wrapper
+    |           \---steamworks_sdk_161
+    |               \---sdk
+    |                   \---redistributable_bin
+    |                       \---win64
+    |                               steam_api64.dll
+    |                               
     +---Scripts
     |   |   activate
     |   |   activate.bat
