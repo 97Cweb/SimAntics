@@ -66,9 +66,15 @@ class Simulation:
             time.sleep(0.1)
 
     def update(self):
+        
         current_time = time.time()
-        state_updated = False
+        while not self.command_queue.empty():
+          command = self.command_queue.get()
+          print(f"Processing command: {command}")
+          self.process_command(command)
+        
 
+        state_updated = False
         if current_time - self.last_map_update >= self.map_update_interval:
             self.last_map_update = current_time
             self.update_map()
@@ -83,6 +89,38 @@ class Simulation:
             self.broadcast_update({"frame": self.frame_counter, "map": self.grid, "gas": self.gas_grid})
 
         self.frame_counter += 1
+
+    def process_command(self, command):
+        """
+        Handle commands from the queue.
+        Commands can include Lua scripts or other client actions.
+        """
+        if "event" in command:
+            if command["event"] == "login":
+                username = command["username"]
+                if username not in self.players:
+                    print("adding player")
+                    self.create_player(username)
+        else:
+            print(f"Unhandled command: {command}")
+
+    # New player-related methods
+    def create_player(self, username):
+        """Create a new player in the simulation and generate their folder and Lua scripts."""
+        if username in self.players:
+            print(f"Player {username} already exists.")
+            return
+
+        # Create player folder
+        SimulationSaver.create_player_folder(self.save_name,username)
+        
+        # Add player to simulation
+        self.players[username] = Player(username, self.save_name)
+        print(f"Player {username} added to the simulation.")
+
+        
+
+    
 
     def broadcast_update(self, state):
         self.server_outbound_queue.put(state)

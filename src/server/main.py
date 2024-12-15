@@ -12,15 +12,15 @@ def main():
     
     simulation = Simulation(save_name = "test1",x=3,y=3, map_update_interval=0.5, gas_update_interval= 1.0)
     
-    # Load or start fresh
-    load_save = input("Load a save? (y/n): ").strip().lower()
-    if load_save == "yn":
-       save_name = input("Enter save name: ").strip()
-       try:
-           simulation.load(save_name)
-       except FileNotFoundError as e:
-           print(e)
-           return
+    # # Load or start fresh
+    # load_save = input("Load a save? (y/n): ").strip().lower()
+    # if load_save == "yn":
+    #    save_name = input("Enter save name: ").strip()
+    #    try:
+    #        simulation.load(save_name)
+    #    except FileNotFoundError as e:
+    #        print(e)
+    #        return
     
     
     server = Server(simulation)
@@ -45,10 +45,10 @@ def main():
     server.stop()
     simulation.stop()
 
-    # Save the game before exiting
-    save_game = input("Save the game? (y/n): ").strip().lower()
-    if save_game == "y":
-        simulation.save()
+    # # Save the game before exiting
+    # save_game = input("Save the game? (y/n): ").strip().lower()
+    # if save_game == "y":
+    #     simulation.save()
 
 
 if __name__ == "__main__":

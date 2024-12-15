@@ -1,4 +1,5 @@
 import os
+import shutil
 import json5
 
 
@@ -25,6 +26,7 @@ class SimulationSaver:
         with open(os.path.join(save_path, "sim.json"), "w") as f:
             json5.dump(save_data, f, indent=4)
         print(f"Game saved to {save_path}")
+        
 
     @staticmethod
     def load(lua_runtime, save_name):
@@ -58,3 +60,24 @@ class SimulationSaver:
             [lua_runtime.table_from(cell) for cell in row]
             for row in formatted_grid
         ]
+
+    @staticmethod
+    def create_player_folder(save_name,username):
+        """Create a folder for the player and generate their Lua scripts."""
+        players_path = os.path.join("saves", save_name, "players")
+        
+        templates_path = os.path.join("lua", "templates")
+        player_template_path = os.path.join(templates_path, "PlayerA")
+        print(player_template_path)
+        
+        # Ensure the templates folder exists
+        if not os.path.exists(player_template_path):
+           raise FileNotFoundError(f"Template folder {player_template_path} does not exist.")
+
+        # Copy the template directory to the player's folder
+        intermediate_path = os.path.join(players_path, username) 
+        shutil.copytree(player_template_path, intermediate_path, dirs_exist_ok = True)
+        
+        
+
+        print(f"Player folder created for {username}")

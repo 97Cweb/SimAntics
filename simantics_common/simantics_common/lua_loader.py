@@ -1,7 +1,7 @@
 import os
 
 
-def load_lua_scripts(lua_runtime, base_path, mods_path):
+def load_lua_scripts(lua_runtime, base_path, mods_path, global_reference = False):
     """
     Load Lua scripts from core, replaceable, and mods folders.
     
@@ -26,7 +26,7 @@ def load_lua_scripts(lua_runtime, base_path, mods_path):
     return lua_scripts, mod_list
 
 
-def load_scripts_from_folders(lua_runtime, base_path, folders, lua_scripts):
+def load_scripts_from_folders(lua_runtime, base_path, folders, lua_scripts, global_reference = False):
     """
     Load Lua scripts from specified folders into the lua_scripts dictionary.
 
@@ -38,10 +38,13 @@ def load_scripts_from_folders(lua_runtime, base_path, folders, lua_scripts):
     """
     for folder in folders:
         folder_path = os.path.join(base_path, folder)
-        if os.path.exists(folder_path):
-            for file in os.listdir(folder_path):
-                load_lua_script(lua_runtime, folder_path, file, lua_scripts)
+        load_scripts_from_folder(lua_runtime, folder_path, lua_scripts, global_reference)
 
+def load_scripts_from_folder(lua_runtime, folder_path, lua_scripts, global_reference = False):
+    if os.path.exists(folder_path):
+        for file in os.listdir(folder_path):
+            load_lua_script(lua_runtime, folder_path, file, lua_scripts, global_reference)
+    
 
 def load_mod_scripts(lua_runtime, mods_path, lua_scripts):
     """
@@ -65,7 +68,7 @@ def load_mod_scripts(lua_runtime, mods_path, lua_scripts):
     return mod_list
 
 
-def load_lua_script(lua_runtime, folder_path, file, lua_scripts):
+def load_lua_script(lua_runtime, folder_path, file, lua_scripts, global_reference = False):
     """
     Load a single Lua script and add it to the lua_scripts dictionary.
 
@@ -81,4 +84,6 @@ def load_lua_script(lua_runtime, folder_path, file, lua_scripts):
         with open(script_path, "r") as f:
             script_code = f.read()
             lua_runtime.execute(script_code)
+            if global_reference:
+                lua_runtime.globals()[name] = lua_runtime.globals()[name]
             lua_scripts[name] = lua_runtime.globals()

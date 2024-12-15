@@ -73,7 +73,7 @@ class Server(threading.Thread):
                client_socket.sendall(json5.dumps({"status": "success", "message": "Authentication succeeded"}).encode('utf-8'))
                # Notify simulation of the new player
                self.notify_simulation(event="login", username=username)
-               
+                
                # Start a thread to listen for client messages
                threading.Thread(target=self.listen_for_client_messages, args=(username,), daemon=True).start()
            else:
@@ -82,6 +82,8 @@ class Server(threading.Thread):
        except Exception as e:
            print(f"Error during authentication: {e}")
            client_socket.close()
+    
+    
     
     def run(self):
         """Start the server loop."""

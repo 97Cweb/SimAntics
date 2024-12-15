@@ -1,6 +1,6 @@
 {
     version: "0.0.1",
-    frame_counter: 28,
+    frame_counter: 0,
     mods: [
         "first mod",
     ],
@@ -8,44 +8,44 @@
         grid: [
             [
                 {
-                    resources: 18,
-                    terrain: 3,
-                },
-                {
-                    resources: 18,
+                    resources: 0,
                     terrain: 8,
                 },
                 {
-                    resources: 18,
-                    terrain: 8,
+                    resources: 0,
+                    terrain: 2,
+                },
+                {
+                    resources: 0,
+                    terrain: 5,
                 },
             ],
             [
                 {
-                    resources: 18,
-                    terrain: 6,
+                    resources: 0,
+                    terrain: 4,
                 },
                 {
-                    resources: 18,
-                    terrain: 6,
+                    resources: 0,
+                    terrain: 5,
                 },
                 {
-                    resources: 18,
-                    terrain: 10,
+                    resources: 0,
+                    terrain: 9,
                 },
             ],
             [
                 {
-                    resources: 18,
-                    terrain: 3,
+                    resources: 0,
+                    terrain: 6,
                 },
                 {
-                    resources: 18,
+                    resources: 0,
                     terrain: 1,
                 },
                 {
-                    resources: 18,
-                    terrain: 8,
+                    resources: 0,
+                    terrain: 1,
                 },
             ],
         ],
