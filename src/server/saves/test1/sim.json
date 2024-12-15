@@ -1,0 +1,71 @@
+{
+    version: "0.0.1",
+    frame_counter: 28,
+    mods: [
+        "first mod",
+    ],
+    simulation_state: {
+        grid: [
+            [
+                {
+                    resources: 18,
+                    terrain: 3,
+                },
+                {
+                    resources: 18,
+                    terrain: 8,
+                },
+                {
+                    resources: 18,
+                    terrain: 8,
+                },
+            ],
+            [
+                {
+                    resources: 18,
+                    terrain: 6,
+                },
+                {
+                    resources: 18,
+                    terrain: 6,
+                },
+                {
+                    resources: 18,
+                    terrain: 10,
+                },
+            ],
+            [
+                {
+                    resources: 18,
+                    terrain: 3,
+                },
+                {
+                    resources: 18,
+                    terrain: 1,
+                },
+                {
+                    resources: 18,
+                    terrain: 8,
+                },
+            ],
+        ],
+        gas_grid: [
+            [
+                {},
+                {},
+                {},
+            ],
+            [
+                {},
+                {},
+                {},
+            ],
+            [
+                {},
+                {},
+                {},
+            ],
+        ],
+        players: {},
+    },
+}

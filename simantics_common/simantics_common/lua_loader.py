@@ -1,5 +1,6 @@
 import os
 
+
 def load_lua_scripts(lua_runtime, base_path, mods_path):
     """
     Load Lua scripts from core, replaceable, and mods folders.
@@ -10,39 +11,74 @@ def load_lua_scripts(lua_runtime, base_path, mods_path):
         mods_path: Path to the `mods` folder.
         
     Returns:
-        A dictionary mapping script names to their Lua objects.
+        A tuple:
+            - A dictionary mapping script names to their Lua objects.
+            - A list of mod names.
     """
-    
     lua_scripts = {}
-    mod_list = []
-    #load core and replaceable scripts
-    for folder in ["core", "replaceable"]:
+
+    # Load core and replaceable scripts
+    load_scripts_from_folders(lua_runtime, base_path, ["core", "replaceable"], lua_scripts)
+
+    # Load mod scripts
+    mod_list = load_mod_scripts(lua_runtime, mods_path, lua_scripts)
+
+    return lua_scripts, mod_list
+
+
+def load_scripts_from_folders(lua_runtime, base_path, folders, lua_scripts):
+    """
+    Load Lua scripts from specified folders into the lua_scripts dictionary.
+
+    Args:
+        lua_runtime: LuaRuntime instance.
+        base_path: Path to the base directory containing folders.
+        folders: List of folders to search for Lua scripts.
+        lua_scripts: Dictionary to store loaded Lua scripts.
+    """
+    for folder in folders:
         folder_path = os.path.join(base_path, folder)
         if os.path.exists(folder_path):
             for file in os.listdir(folder_path):
-                name, ext = os.path.splitext(file)
-                if ext == ".lua":
-                    script_path = os.path.join(folder_path, file)
-                    with open(script_path, "r") as f:
-                        script_code = f.read()
-                        lua_runtime.execute(script_code)
-                        lua_scripts[name] = lua_runtime.globals()
+                load_lua_script(lua_runtime, folder_path, file, lua_scripts)
 
-    #load mod scripts
+
+def load_mod_scripts(lua_runtime, mods_path, lua_scripts):
+    """
+    Load Lua scripts from mods into the lua_scripts dictionary.
+
+    Args:
+        lua_runtime: LuaRuntime instance.
+        mods_path: Path to the mods directory.
+        lua_scripts: Dictionary to store loaded Lua scripts.
+
+    Returns:
+        A list of mod folder names.
+    """
+    mod_list = []
     if os.path.exists(mods_path):
         for mod_folder in os.listdir(mods_path):
             mod_list.append(mod_folder)
             mod_path = os.path.join(mods_path, mod_folder)
             if os.path.isdir(mod_path):
-                for folder in ["replaceable"]:
-                    mod_subfolder = os.path.join(mod_path, folder)
-                    if os.path.exists(mod_subfolder):
-                        name, ext = os.path.splitext(file)
-                        if ext == ".lua":
-                            script_path = os.path.join(mod_subfolder, file)
-                            with open(script_path, "r") as f:
-                                script_code = f.read()
-                                lua_runtime.execute(script_code)
-                                lua_scripts[name] = lua_runtime.globals()
+                load_scripts_from_folders(lua_runtime, mod_path, ["replaceable"], lua_scripts)
+    return mod_list
 
-    return lua_scripts, mod_list
+
+def load_lua_script(lua_runtime, folder_path, file, lua_scripts):
+    """
+    Load a single Lua script and add it to the lua_scripts dictionary.
+
+    Args:
+        lua_runtime: LuaRuntime instance.
+        folder_path: Path to the folder containing the Lua script.
+        file: Name of the Lua file to load.
+        lua_scripts: Dictionary to store the loaded Lua script.
+    """
+    name, ext = os.path.splitext(file)
+    if ext == ".lua":
+        script_path = os.path.join(folder_path, file)
+        with open(script_path, "r") as f:
+            script_code = f.read()
+            lua_runtime.execute(script_code)
+            lua_scripts[name] = lua_runtime.globals()

@@ -105,15 +105,25 @@ class Server(threading.Thread):
                 client_thread.start()
             except socket.timeout:
                 continue  # Timeout allows the loop to check the `running` flag
+            
+            except OSError:
+                # Gracefully handle the case where the socket is closed
+                if not self.running:
+                    break  # Exit the loop if the server is no longer running
 
     def stop(self):
         """Stop the server."""
         self.running = False
-        if self.server_socket:
-            self.server_socket.close()
-        if self.udp_socket:
-            self.udp_socket.close()
-        print("Server stopped.")
+        try:
+            if self.server_socket:
+                self.server_socket.close()
+                self.server_socket = None
+            if self.udp_socket:
+                self.udp_socket.close()
+                self.udp_socket = None
+            print("Server stopped.")
+        except OSError as e:
+            print(f"Error while stopping server: {e}")
         
     def broadcast_updates(self):
         """Process the outbound queue and send updates via UDP."""
