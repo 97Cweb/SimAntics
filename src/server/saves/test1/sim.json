@@ -8,44 +8,44 @@
         grid: [
             [
                 {
+                    terrain: 3,
                     resources: 0,
-                    terrain: 8,
                 },
                 {
+                    terrain: 1,
                     resources: 0,
-                    terrain: 2,
                 },
                 {
-                    resources: 0,
-                    terrain: 5,
-                },
-            ],
-            [
-                {
-                    resources: 0,
-                    terrain: 4,
-                },
-                {
-                    resources: 0,
-                    terrain: 5,
-                },
-                {
-                    resources: 0,
-                    terrain: 9,
-                },
-            ],
-            [
-                {
-                    resources: 0,
                     terrain: 6,
+                    resources: 0,
+                },
+            ],
+            [
+                {
+                    terrain: 1,
+                    resources: 0,
                 },
                 {
+                    terrain: 8,
                     resources: 0,
-                    terrain: 1,
                 },
                 {
+                    terrain: 8,
                     resources: 0,
-                    terrain: 1,
+                },
+            ],
+            [
+                {
+                    terrain: 3,
+                    resources: 0,
+                },
+                {
+                    terrain: 3,
+                    resources: 0,
+                },
+                {
+                    terrain: 2,
+                    resources: 0,
                 },
             ],
         ],

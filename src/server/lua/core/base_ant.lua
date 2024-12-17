@@ -12,9 +12,12 @@ function Base_Ant.extend()
     return child
 end
 
--- Example method in Base_Ant
-function Base_Ant.move()
-    print("Base ant move")
+
+function Base_Ant:update()
+    print("Lua received update for ant")
+
+    Base_Ant.set_velocity(1, 0.2)
 end
+
 
 return Base_Ant

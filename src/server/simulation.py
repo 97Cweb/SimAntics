@@ -66,7 +66,7 @@ class Simulation:
             time.sleep(0.1)
 
     def update(self):
-        
+        self.frame_counter += 1
         current_time = time.time()
         while not self.command_queue.empty():
           command = self.command_queue.get()
@@ -88,7 +88,10 @@ class Simulation:
         if state_updated:
             self.broadcast_update({"frame": self.frame_counter, "map": self.grid, "gas": self.gas_grid})
 
-        self.frame_counter += 1
+
+        for player in self.players.values():
+            player.update()
+        
 
     def process_command(self, command):
         """

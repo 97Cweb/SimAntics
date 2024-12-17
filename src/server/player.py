@@ -1,8 +1,10 @@
+import os
 from lupa import LuaRuntime
 from lupa.lua54 import LuaError
 
 from simantics_common.lua_loader import load_scripts_from_folder
-import os
+from ant import Ant
+
 
 class Player:
     def __init__(self, username, save_name, is_human=True, ):
@@ -16,8 +18,24 @@ class Player:
         self.nests = []
         
         self.scripts_loaded = False
+        self.lua_scripts = {}  # Dictionary for loaded scripts
         
         self._initialize_lua_environment()
+        
+        self.add_ant(Ant(32))
+        
+    def update(self):
+        self._update_ants()
+        #self._update_nests()
+    
+    def _update_ants(self):
+        for ant in self.ants:
+            ant.update(self.lua_runtime)
+    
+    
+    # def _update_nests(self):
+    #     for nest in self.nests:
+    #         nest.update(self.lua_runtime)
         
     def _initialize_lua_environment(self):
         """
@@ -25,6 +43,9 @@ class Player:
         and player-specific extensions.
         """
         try:
+            
+            # Load the sandbox environment
+            self._load_setup_scripts()
                         
             # Load core scripts (base_ant, base_nest)
             self._load_core_scripts()
@@ -37,6 +58,17 @@ class Player:
         except Exception as e:
             print(f"Error initializing Lua environment for player {self.username}: {e}")
             self.scripts_loaded = False
+            
+   
+    def _load_setup_scripts(self):
+        """
+        Load foundational Lua scripts required for setting up the Lua environment.
+        These scripts reside in the 'lua/setup' folder.
+        """
+        setup_scripts_dir = "lua/setup"
+        load_scripts_from_folder(self.lua_runtime, setup_scripts_dir, self.lua_scripts, global_reference=True)
+        print(f"Core scripts loaded for player: {self.username}")
+
             
     def _load_core_scripts(self):
         """
@@ -51,7 +83,7 @@ class Player:
         Load player-specific Lua scripts, such as `player_ant` and `player_nest`.
         """
         player_scripts_dir = os.path.join("saves", self.save_name, "players", self.username)
-        load_scripts_from_folder(self.lua_runtime, player_scripts_dir, self.lua_scripts, global_reference=False)
+        load_scripts_from_folder(self.lua_runtime, player_scripts_dir, self.lua_scripts, global_reference=True)
         print(f"Player-specific scripts loaded for {self.username}")
 
     
