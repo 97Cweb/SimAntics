@@ -8,7 +8,7 @@ class Ant:
         self.direction = 0      # Default facing direction
         self.speed = 0
         self.max_speed = max_speed
-        self.memory = AntMemory(max_len=memory_size, default_value=None, shift_callback=self.on_memory_shift)
+        self.memory = AntMemory(max_len=memory_size, default_value=None, shift_callback=self._on_memory_shift)
 
     def see(self, degrees, distance):
         """Simulate ant vision."""
@@ -43,6 +43,15 @@ class Ant:
             base_ant_table.set_velocity = self.set_velocity
     
     
+            # Provide controlled access to memory (read/write, no expansion)
+            base_ant_table.memory = {
+           "get": self.memory.getitem,
+           "set": self.memory.setitem,
+           "add": self.memory.add,
+           "shift": self.memory.shift,
+           
+       }
+    
             
             # Call the Lua script's "update" function
             lua_update = base_ant_table.update  # Don't call it yet (no parentheses)
@@ -54,19 +63,13 @@ class Ant:
             print(f"Error in Lua script for Ant {self.ant_id}: {e}")    
 
     
-    def on_memory_shift(self, evicted_value):
+    def _on_memory_shift(self, evicted_value):
         """
         Callback function for when memory shifts (when an item is evicted).
         This would notify Lua or handle any needed action when memory is full.
         """
         print(f"Memory shifted, evicted: {evicted_value}")
 
-
-    def get_memory(self):
-        """
-        Return the ant's memory so that Lua can interact with it.
-        """
-        return list(self.memory)  # Convert deque to a regular list for Lua access
 
     def move(self, direction, magnitude):
         """
