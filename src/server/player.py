@@ -7,11 +7,12 @@ from simantics_common.lua_loader import load_scripts_from_folder
 from nest import Nest
 
 class Player:
-    def __init__(self, username, save_name, pheromone_manager, is_human=True, ):
+    def __init__(self, username, save_name, pheromone_manager, message_callback, is_human=True, ):
         self.username = username
         self.is_human = is_human
         self.client = None  # To track the connected client socket
         self.save_name = save_name
+        self.message_callback = message_callback  # Callback for sending messages
         
         
         self.lua_runtime = LuaRuntime(unpack_returned_tuples=True)  # Player-specific Lua environment
@@ -23,6 +24,7 @@ class Player:
         self.lua_scripts = {}  # Dictionary for loaded scripts
         
         self._initialize_lua_environment()
+        self._redirect_lua_print()
         
         self.add_nest(Nest(self, self.pheromone_manager))
         
@@ -116,3 +118,22 @@ class Player:
         """
         self.nests.append(nest)
         print(f"Nest added for player {self.username}. Total nests: {len(self.nests)}")
+        
+    def _redirect_lua_print(self):
+        """
+        Redirect the Lua `print` function to a custom Python function.
+        """
+        self.lua_runtime.globals()["print"] = self._lua_print
+        
+    def _lua_print(self, *args):
+        """
+        Custom print function for Lua that redirects output to the callback.
+        """
+        message = " ".join(map(str, args))
+        self.message_callback(self.username, f"[Lua]: {message}")
+
+    def print(self, message):
+        """
+        Custom print method for Python components.
+        """
+        self.message_callback(self.username, f"[Python]: {message}")

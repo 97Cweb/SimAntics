@@ -24,7 +24,7 @@ def main():
     
     
     server = Server(simulation)
-    
+    simulation.set_server(server)
     
     
     try:

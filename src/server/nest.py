@@ -14,7 +14,7 @@ class Nest:
     
     def smell(self):
         """Simulate nest smelling."""
-        print("nest {self.nest_id} is smelling surroundings")
+        self.player.print("nest {self.nest_id} is smelling surroundings")
         return []
 
     def spawn_ant(self):
@@ -23,14 +23,14 @@ class Nest:
         self.ants.append(new_ant)
         if self.spawn_callback:
             self.spawn_callback(new_ant)
-            print("Nest spawned Ant")
+            self.player.print("Nest spawned Ant")
             
     def emit_pheromone(self, pheromone_name, amount):
         pheromone_uuid = self.pheromone_manager.get_pheromone_uuid(self.player.username, pheromone_name)
         if pheromone_uuid:
             self.pheromone_manager.emit_pheromone(self.x, self.y, pheromone_uuid, amount)
         else:
-            print(f"[Warning] Pheromone '{pheromone_name}' not registered for player {self.player.username}.")
+            self.player.print(f"[Warning] Pheromone '{pheromone_name}' not registered for player {self.player.username}.")
     
        
     def update(self, lua_runtime):
@@ -63,9 +63,9 @@ class Nest:
             if lua_update:
                 lua_update()
             else:
-                print(f"No update function found in Lua for Ant {self.ant_id}")
+                self.player.print(f"No update function found in Lua for Ant {self.ant_id}")
         except Exception as e:
-            print(f"Error in Lua script for Ant {self.ant_id}: {e}")    
+            self.player.print(f"Error in Lua script for Nest: {e}")    
 
         for ant in self.ants:
             ant.update(lua_runtime)

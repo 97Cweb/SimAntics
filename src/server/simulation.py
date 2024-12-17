@@ -16,6 +16,7 @@ class Simulation:
     def __init__(self, save_name, x=10, y=10, map_update_interval=1.0, gas_update_interval=1.0):
         self.lua = LuaRuntime(unpack_returned_tuples=True)
         self.save_name = save_name
+        self.server = None
         
         self.map_update_interval = map_update_interval
         self.gas_update_interval = gas_update_interval
@@ -117,9 +118,12 @@ class Simulation:
         SimulationSaver.create_player_folder(self.save_name,username)
         
         # Add player to simulation
-        self.players[username] = Player(username, self.save_name, self.pheromone_manager)
+        self.players[username] = Player(username, self.save_name, self.pheromone_manager, message_callback = self.server.message_throttler.add_message)
         print(f"Player {username} added to the simulation.")
 
 
     def broadcast_update(self, state):
         self.server_outbound_queue.put(state)
+        
+    def set_server(self, server):
+        self.server = server

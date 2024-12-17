@@ -15,6 +15,7 @@ class Client:
         self.udp_socket = None
         self.keep_alive_thread = None
         self.udp_thread = None
+        self.tcp_thread = None  # New TCP listener thread
         self.running = True
         self.last_frame = 0
 
@@ -51,6 +52,37 @@ class Client:
                     print(f"Ignored outdated frame {state['frame']}")
         except Exception as e:
             print(f"Error in UDP listener: {e}")
+            
+    def listen_for_tcp_messages(self):
+        """Listen for TCP messages from the server."""
+        buffer = ""  # Buffer to accumulate data
+    
+        while self.running:
+            try:
+                data = self.tcp_client.recv(4096).decode('utf-8')
+                if not data:
+                    print("Disconnected from server.")
+                    self.running = False
+                    break
+    
+                buffer += data  # Append new data to the buffer
+                
+                # Process complete messages
+                while "\n" in buffer:
+                    message, buffer = buffer.split("\n", 1)
+                    try:
+                        parsed_message = json5.loads(message)
+                        print(f"Received: {parsed_message}")
+                    except json5.JSONDecodeError as e:
+                        print(f"Failed to parse message: {message}. Error: {e}")
+    
+            except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
+                print("Disconnected from server.")
+                self.running = False
+                break
+            except Exception as e:
+                print(f"Error in TCP listener: {e}")
+
 
     def connect(self, username, password):
         """Connect to the server and start threads."""
@@ -76,6 +108,10 @@ class Client:
             self.udp_thread = threading.Thread(target=self.listen_for_udp_updates, daemon=True)
             self.udp_thread.start()
 
+            # Start TCP listener thread
+            self.tcp_thread = threading.Thread(target=self.listen_for_tcp_messages, daemon=True)
+            self.tcp_thread.start()
+            
             # Start keep-alive thread
             self.keep_alive_thread = threading.Thread(target=self.send_keep_alive, daemon=True)
             self.keep_alive_thread.start()
@@ -99,6 +135,8 @@ class Client:
             self.keep_alive_thread.join()
         if self.udp_thread and self.udp_thread.is_alive():
             self.udp_thread.join()
+        if self.tcp_thread and self.tcp_thread.is_alive():
+            self.tcp_thread.join()
         if self.tcp_client:
             self.tcp_client.close()
         if self.udp_socket:

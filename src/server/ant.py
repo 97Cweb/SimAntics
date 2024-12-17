@@ -15,12 +15,12 @@ class Ant:
 
     def see(self, degrees, distance):
         """Simulate ant vision."""
-        print(f"Ant {self.ant_id} sees within {degrees} degrees and {distance} distance.")
+        self.player.print(f"Ant {self.ant_id} sees within {degrees} degrees and {distance} distance.")
         return []  # Example: Return empty vision for now
     
     def smell(self):
         """Simulate ant smelling."""
-        print("ant {self.ant_id} is smelling surroundings")
+        self.player.print("ant {self.ant_id} is smelling surroundings")
         return []
     
     def emit_pheromone(self, pheromone_name, amount):
@@ -28,13 +28,13 @@ class Ant:
         if pheromone_uuid:
             self.pheromone_manager.emit_pheromone(self.x, self.y, pheromone_uuid, amount)
         else:
-            print(f"[Warning] Pheromone '{pheromone_name}' not registered for player {self.player.username}.")
+            self.player.print(f"[Warning] Pheromone '{pheromone_name}' not registered for player {self.player.username}.")
     
     def set_velocity(self, magnitude, rel_angle ):
         """Set the movement of the ant."""
         self.direction = rel_angle
         self.speed = min(max(magnitude, 0.0), 1.0)
-        print(f"Ant moving at {self.speed} speed and {self.direction} direction.")
+        self.player.print(f"Ant moving at {self.speed} speed and {self.direction} direction.")
 
     def update(self, lua_runtime):
         """Update ant behavior using the Lua script."""
@@ -70,9 +70,9 @@ class Ant:
             if lua_update:
                 lua_update()
             else:
-                print(f"No update function found in Lua for Ant {self.ant_id}")
+                self.player.print(f"No update function found in Lua for Ant {self.ant_id}")
         except Exception as e:
-            print(f"Error in Lua script for Ant: {e}")    
+            self.player.print(f"Error in Lua script for Ant: {e}")    
 
     
     def _on_memory_shift(self, evicted_value):

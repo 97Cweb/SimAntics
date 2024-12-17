@@ -77,7 +77,6 @@ class PheromoneManager:
         """
         if 0 <= y < self.height and 0 <= x < self.width:
             self.grid[pheromone_uuid][y][x] += amount
-            print(f"ant emit pheromone ({x},{y})")
 
     def smell_pheromones(self, x, y, radius, player_id):
         """

@@ -8,11 +8,11 @@ import time
 from queue import Queue
 
 from client_connection import ClientConnection
-
+from message_throttler import MessageThrottler
 
 
 class Server(threading.Thread):
-    def __init__(self, simulation, host='127.0.0.1', port=65432, udp_port=65433, inactivity_timeout=15):
+    def __init__(self, simulation, host='127.0.0.1', port=65432, udp_port=65433, inactivity_timeout=15, message_interval_rate = 5):
         super().__init__()
         self.simulation = simulation
         self.host = host
@@ -28,6 +28,8 @@ class Server(threading.Thread):
         
         # Track unacknowledged frames
         self.unacknowledged_frames = {}  # {client_address: {frame: (timestamp, state)}}
+
+        self.message_throttler = MessageThrottler(send_callback=self.send_message_to_client, interval= message_interval_rate)
 
     def authenticate(self, credentials):
         """Authenticate client"""
@@ -123,6 +125,7 @@ class Server(threading.Thread):
     def stop(self):
         """Stop the server."""
         self.running = False
+        self.message_throttler.stop()
         try:
             if self.server_socket:
                 self.server_socket.close()
@@ -170,6 +173,27 @@ class Server(threading.Thread):
                         self.unacknowledged_frames[client.udp_address] = {}
                     self.unacknowledged_frames[client.udp_address][state["frame"]] = (time.time(), state)
 
+
+    def send_message_to_client(self, username, message):
+        """
+        Send a message to a specific client.
+        
+        Args:
+            username (str): The username of the connected client.
+            message (str): The message to send.
+        """
+        try:
+            client_connection = self.connected_clients.get(username)
+            if client_connection:
+                client_connection.client_socket.sendall(
+                    (json5.dumps({"type": "message", "content": message}) + "\n").encode('utf-8')
+                )
+            else:
+                print(f"[Warning] Attempted to send message to {username}, but they are not connected.")
+        except Exception as e:
+            print(f"[Error] Failed to send message to {username}: {e}")
+        
+        
     def handle_file_upload(self, username, message):
         """
         Handle file uploads sent by the client.
