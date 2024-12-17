@@ -3,7 +3,7 @@ from lupa import LuaRuntime
 from lupa.lua54 import LuaError
 
 from simantics_common.lua_loader import load_scripts_from_folder
-from ant import Ant
+from nest import Nest
 
 
 class Player:
@@ -14,7 +14,6 @@ class Player:
         self.save_name = save_name
         
         self.lua_runtime = LuaRuntime(unpack_returned_tuples=True)  # Player-specific Lua environment
-        self.ants = []  # List of the player's ants
         self.nests = []
         
         self.scripts_loaded = False
@@ -22,20 +21,16 @@ class Player:
         
         self._initialize_lua_environment()
         
-        self.add_ant(Ant(32))
+        self.add_nest(Nest())
         
     def update(self):
-        self._update_ants()
-        #self._update_nests()
-    
-    def _update_ants(self):
-        for ant in self.ants:
-            ant.update(self.lua_runtime)
+        self._update_nests()
     
     
-    # def _update_nests(self):
-    #     for nest in self.nests:
-    #         nest.update(self.lua_runtime)
+    
+    def _update_nests(self):
+        for nest in self.nests:
+            nest.update(self.lua_runtime)
         
     def _initialize_lua_environment(self):
         """
@@ -121,12 +116,13 @@ class Player:
         except LuaError as e:
             raise RuntimeError(f"Error updating Lua script {script_name} for player {self.username}: {e}")
 
-    def add_ant(self, ant):
+    
+    def add_nest(self, nest):
         """
-        Add an ant to the player's list of ants.
+        Add an nest to the player's list of nests.
 
         Args:
-            ant: The ant instance to add.
+            nest: The nest instance to add.
         """
-        self.ants.append(ant)
-        print(f"Ant added for player {self.username}. Total ants: {len(self.ants)}")
+        self.nests.append(nest)
+        print(f"Nest added for player {self.username}. Total nests: {len(self.nests)}")

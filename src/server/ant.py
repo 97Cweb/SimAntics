@@ -1,14 +1,14 @@
 import math 
+import random
 
-from ant_memory import AntMemory
+from memory import Memory
 class Ant:
-    def __init__(self, ant_id, max_speed=1.0, memory_size = 32):
-        self.ant_id = ant_id
-        self.position = (0, 0)  # Default position
-        self.direction = 0      # Default facing direction
+    def __init__(self, position = (0,0), max_speed=1.0, memory_size = 32):
+        self.position = position
+        self.direction = random.uniform(0, 2*math.pi)      # Default facing direction
         self.speed = 0
         self.max_speed = max_speed
-        self.memory = AntMemory(max_len=memory_size, default_value=None, shift_callback=self._on_memory_shift)
+        self.memory = Memory(max_len=memory_size, default_value=None, shift_callback=self._on_memory_shift)
 
     def see(self, degrees, distance):
         """Simulate ant vision."""

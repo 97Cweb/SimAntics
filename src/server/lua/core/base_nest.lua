@@ -1,8 +1,8 @@
 Base_Nest = {}
 
-
+-- Define methods for Base_Nest
 function Base_Nest.new()
-    local self = setmetatable({}, Base_Nest)
+    local self = setmetatable({}, { __index = Base_Nest })
     return self
 end
 
@@ -12,16 +12,11 @@ function Base_Nest.extend()
     return child
 end
 
-function Base_Nest:smell()
-    print("Base_Nest is smelling.")
-end
-
-function Base_Nest:sight()
-    print("Base_Nest is seeing.")
-end
 
 function Base_Nest:update()
-    print("Base_Nest is updating.")
+    print("Lua received update for nest")
+	Base_Nest.spawn_ant()
 end
+
 
 return Base_Nest

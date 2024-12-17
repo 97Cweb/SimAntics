@@ -2,7 +2,7 @@ import threading
 from collections import deque
 
 # AntMemory class from above (simplified for clarity)
-class AntMemory:
+class Memory:
     def __init__(self, max_len=32, default_value=None, shift_callback=None):
         self.max_len = max_len
         self.shift_callback = shift_callback
