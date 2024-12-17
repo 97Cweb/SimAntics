@@ -1,7 +1,9 @@
+import os
 import socket
 import threading
 import json5
 import time
+
 
 from queue import Queue
 
@@ -48,6 +50,11 @@ class Server(threading.Thread):
                     # Update the client's last active time
                     client_connection.last_active = time.time()
                     print(f"Keep-alive received from {username}")
+                    
+                elif message.get("type") == "file_upload":
+                    self.handle_file_upload(username, message)
+                else:
+                    print(f"Unhandled message type from {username}: {message['type']}")
             except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError):
                 break
             except Exception as e:
@@ -162,6 +169,52 @@ class Server(threading.Thread):
                     if client.udp_address not in self.unacknowledged_frames:
                         self.unacknowledged_frames[client.udp_address] = {}
                     self.unacknowledged_frames[client.udp_address][state["frame"]] = (time.time(), state)
+
+    def handle_file_upload(self, username, message):
+        """
+        Handle file uploads sent by the client.
+        Args:
+            username (str): The username of the player.
+            message (dict): Contains file name and content.
+        """
+        try:
+            # Ensure the player exists
+            player = self.simulation.players.get(username)
+            if not player:
+                raise ValueError(f"Player {username} not found.")
+    
+            # Extract file details
+            file_name = message.get("file_name")
+            file_content = message.get("file_content")
+            save_name = player.save_name  # Assuming the save_name is available
+    
+            if not file_name or not file_content:
+                raise ValueError("File name or content missing in upload request.")
+    
+            # Determine the player's Lua folder
+            player_lua_folder = os.path.join("saves", save_name, "players", username)
+            os.makedirs(player_lua_folder, exist_ok=True)  # Ensure the folder exists
+    
+            # Save the file
+            file_path = os.path.join(player_lua_folder, file_name)
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(file_content)
+            print(f"File {file_name} uploaded for player {username} at {file_path}")
+    
+            # Reinitialize the player's Lua environment
+            player._initialize_lua_environment()
+    
+            # Respond to the client
+            client_connection = self.connected_clients[username]
+            client_connection.client_socket.sendall(
+                json5.dumps({"status": "success", "message": f"File {file_name} uploaded and reloaded successfully."}).encode('utf-8')
+            )
+        except Exception as e:
+            print(f"Error during file upload for player {username}: {e}")
+            client_connection = self.connected_clients[username]
+            client_connection.client_socket.sendall(
+                json5.dumps({"status": "error", "message": str(e)}).encode('utf-8')
+            )
 
     def notify_simulation(self, event, username):
         self.simulation.command_queue.put({
