@@ -19,30 +19,52 @@ class PheromoneManager:
         self.grid = defaultdict(lambda: [[0.0 for _ in range(width)] for _ in range(height)])
 
         # Mapping for player anonymity
-        self.player_pheromone_map = {}  # player_id -> {pheromone_name: UUID}
-        self.uuid_to_pheromone = {}     # UUID -> (player_id, pheromone_name)
+        # Definitions: player_id -> [{pheromone_name, uuid, decay, diffusion}]
+        self.pheromone_definitions = defaultdict(list)
 
-    def register_pheromone(self, player_id, pheromone_name):
+        # Reverse mapping for UUID lookup
+        self.uuid_to_pheromone = {}  # UUID -> (player_id, pheromone_name)
+        
+    def register_pheromones(self, player_id, definitions):
         """
-        Register a pheromone for a player and generate a UUID.
+        Register multiple pheromones for a player.
 
         Args:
-            player_id (str): ID of the player.
-            pheromone_name (str): The name of the pheromone.
-
-        Returns:
-            str: The UUID associated with the pheromone.
+            player_id (str): Player's unique ID.
+            definitions (list): List of pheromone definitions (dicts with name, decay, diffusion).
         """
-        if player_id not in self.player_pheromone_map:
-            self.player_pheromone_map[player_id] = {}
+        for definition in definitions:
+            name = definition.get("name")
+            decay = definition.get("decay", 0.1)
+            diffusion = definition.get("diffusion", 0.25)
 
-        if pheromone_name not in self.player_pheromone_map[player_id]:
+            # Avoid duplicates
+            if any(p['name'] == name for p in self.pheromone_definitions[player_id]):
+                continue
+
+            # Generate a UUID for this pheromone
             pheromone_uuid = str(uuid.uuid4())
-            self.player_pheromone_map[player_id][pheromone_name] = pheromone_uuid
-            self.uuid_to_pheromone[pheromone_uuid] = (player_id, pheromone_name)
-        
-        return self.player_pheromone_map[player_id][pheromone_name]
+            definition["uuid"] = pheromone_uuid
+            self.pheromone_definitions[player_id].append({
+                "name": name,
+                "uuid": pheromone_uuid,
+                "decay": decay,
+                "diffusion": diffusion
+            })
 
+            # Update reverse mapping
+            self.uuid_to_pheromone[pheromone_uuid] = (player_id, name)
+
+
+    def get_pheromone_uuid(self, player_id, pheromone_name):
+        """
+        Retrieve the UUID for a player's pheromone by name.
+        """
+        for pheromone in self.pheromone_definitions[player_id]:
+            if pheromone["name"] == pheromone_name:
+                return pheromone["uuid"]
+        return None
+    
     def emit_pheromone(self, x, y, pheromone_uuid, amount):
         """
         Emit a pheromone at a specific grid location.
@@ -55,6 +77,7 @@ class PheromoneManager:
         """
         if 0 <= y < self.height and 0 <= x < self.width:
             self.grid[pheromone_uuid][y][x] += amount
+            print(f"ant emit pheromone ({x},{y})")
 
     def smell_pheromones(self, x, y, radius, player_id):
         """

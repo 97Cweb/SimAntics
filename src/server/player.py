@@ -1,3 +1,4 @@
+import json5
 import os
 from lupa import LuaRuntime
 from lupa.lua54 import LuaError
@@ -5,23 +6,25 @@ from lupa.lua54 import LuaError
 from simantics_common.lua_loader import load_scripts_from_folder
 from nest import Nest
 
-
 class Player:
-    def __init__(self, username, save_name, is_human=True, ):
+    def __init__(self, username, save_name, pheromone_manager, is_human=True, ):
         self.username = username
         self.is_human = is_human
         self.client = None  # To track the connected client socket
         self.save_name = save_name
         
+        
         self.lua_runtime = LuaRuntime(unpack_returned_tuples=True)  # Player-specific Lua environment
         self.nests = []
+        self.pheromone_manager = pheromone_manager
+        self.pheromone_definitions = []
         
         self.scripts_loaded = False
         self.lua_scripts = {}  # Dictionary for loaded scripts
         
         self._initialize_lua_environment()
         
-        #self.add_nest(Nest())
+        self.add_nest(Nest(self, self.pheromone_manager))
         
     def update(self):
         self._update_nests()
@@ -54,6 +57,14 @@ class Player:
             print(f"Error initializing Lua environment for player {self.username}: {e}")
             self.scripts_loaded = False
             
+        try:
+            # Load pheromone definitions from JSON5
+            self._load_pheromone_definitions()
+            print(f"Pheromones loaded for player: {self.username}")
+        except Exception as e:
+            print(f"[Error] Failed to load pheromones for player {self.username}: {e}")
+
+            
    
     def _load_setup_scripts(self):
         """
@@ -81,40 +92,19 @@ class Player:
         load_scripts_from_folder(self.lua_runtime, player_scripts_dir, self.lua_scripts, global_reference=True)
         print(f"Player-specific scripts loaded for {self.username}")
 
-    
-    def execute_lua_function(self, function_name, *args):
-        """
-        Execute a Lua function in the player's environment.
 
-        Args:
-            function_name (str): The name of the Lua function to execute.
-            *args: Arguments to pass to the Lua function.
-
-        Returns:
-            The result of the Lua function execution.
+    def _load_pheromone_definitions(self):
         """
-        try:
-            lua_function = self.lua_runtime.globals().get(function_name)
-            if not lua_function:
-                raise ValueError(f"Lua function {function_name} not found for player: {self.username}")
-            return lua_function(*args)
-        except LuaError as e:
-            print(f"Lua error in function {function_name} for player {self.username}: {e}")
-            return None
-        
-    def update_scripts(self, script_name, script_code):
+        Initialize pheromones for this player by loading definitions.
         """
-        Dynamically update a player's Lua script.
-
-        Args:
-            script_name (str): The name of the Lua script being updated (e.g., "player_ant").
-            script_code (str): The new Lua script code.
-        """
-        try:
-            self.lua_runtime.execute(script_code)
-            print(f"Updated Lua script {script_name} for player: {self.username}")
-        except LuaError as e:
-            raise RuntimeError(f"Error updating Lua script {script_name} for player {self.username}: {e}")
+        pheromone_file = os.path.join("saves", self.save_name, "players", self.username, "pheromones.json")
+        if os.path.exists(pheromone_file):
+            with open(pheromone_file, "r") as f:
+                pheromone_definitions = json5.load(f)
+                self.pheromone_manager.register_pheromones(self.username, pheromone_definitions)
+                print(f"Pheromones registered for player {self.username}")
+        else:
+            print(f"No pheromone definition file found for player {self.username}")        
 
     
     def add_nest(self, nest):

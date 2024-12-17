@@ -1,8 +1,11 @@
 from memory import Memory
 from ant import Ant
 class Nest:
-    def __init__(self, memory_size = 128, position = (0,0), spawn_callback=None):
-        self.position = (0, 0)  # Default position
+    def __init__(self, player, pheromone_manager, memory_size = 128, x = 0, y=0, spawn_callback=None):
+        self.x = x
+        self.y = y
+        self.player = player
+        self.pheromone_manager = pheromone_manager
         self.memory = Memory(max_len=memory_size, default_value=None, shift_callback=self._on_memory_shift)
         self.spawn_callback = spawn_callback  # Callback to spawn ants into the simulation
         self.ants = []
@@ -16,11 +19,19 @@ class Nest:
 
     def spawn_ant(self):
         """Spawn a new Ant and notify the simulation."""
-        new_ant = Ant(position=self.position)
+        new_ant = Ant(player= self.player, pheromone_manager= self.pheromone_manager, x=self.x, y = self.y)
         self.ants.append(new_ant)
         if self.spawn_callback:
             self.spawn_callback(new_ant)
-            print(f"Nest spawned Ant")
+            print("Nest spawned Ant")
+            
+    def emit_pheromone(self, pheromone_name, amount):
+        pheromone_uuid = self.pheromone_manager.get_pheromone_uuid(self.player.username, pheromone_name)
+        if pheromone_uuid:
+            self.pheromone_manager.emit_pheromone(self.x, self.y, pheromone_uuid, amount)
+        else:
+            print(f"[Warning] Pheromone '{pheromone_name}' not registered for player {self.player.username}.")
+    
        
     def update(self, lua_runtime):
         """Update nest behavior using the Lua script."""

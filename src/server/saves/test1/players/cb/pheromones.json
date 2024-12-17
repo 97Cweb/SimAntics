@@ -1,0 +1,12 @@
+[
+    {
+        name: "food_trail",
+        diffusion_rate: 0.2,
+        decay_rate: 0.1
+    },
+    {
+        name: "danger",
+        diffusion_rate: 0.3,
+        decay_rate: 0.05
+    }
+]

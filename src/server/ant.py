@@ -3,8 +3,11 @@ import random
 
 from memory import Memory
 class Ant:
-    def __init__(self, position = (0,0), max_speed=1.0, memory_size = 32):
-        self.position = position
+    def __init__(self, player, pheromone_manager, x = 0, y =0, max_speed=1.0, memory_size = 32):
+        self.player = player
+        self.pheromone_manager = pheromone_manager
+        self.x = x
+        self.y = y
         self.direction = random.uniform(0, 2*math.pi)      # Default facing direction
         self.speed = 0
         self.max_speed = max_speed
@@ -19,12 +22,19 @@ class Ant:
         """Simulate ant smelling."""
         print("ant {self.ant_id} is smelling surroundings")
         return []
-
+    
+    def emit_pheromone(self, pheromone_name, amount):
+        pheromone_uuid = self.pheromone_manager.get_pheromone_uuid(self.player.username, pheromone_name)
+        if pheromone_uuid:
+            self.pheromone_manager.emit_pheromone(self.x, self.y, pheromone_uuid, amount)
+        else:
+            print(f"[Warning] Pheromone '{pheromone_name}' not registered for player {self.player.username}.")
+    
     def set_velocity(self, magnitude, rel_angle ):
         """Set the movement of the ant."""
-        self.direction += rel_angle
+        self.direction = rel_angle
         self.speed = min(max(magnitude, 0.0), 1.0)
-        print(f"Ant {self.ant_id} moving at {self.speed} speed and {self.direction} direction.")
+        print(f"Ant moving at {self.speed} speed and {self.direction} direction.")
 
     def update(self, lua_runtime):
         """Update ant behavior using the Lua script."""
@@ -40,7 +50,9 @@ class Ant:
             # Set specific Python functions as attributes of Base_Ant
             base_ant_table.see = self.see
             base_ant_table.smell = self.smell
+            base_ant_table.emit_pheromone = self.emit_pheromone
             base_ant_table.set_velocity = self.set_velocity
+        
     
     
             # Provide controlled access to memory (read/write, no expansion)
@@ -60,7 +72,7 @@ class Ant:
             else:
                 print(f"No update function found in Lua for Ant {self.ant_id}")
         except Exception as e:
-            print(f"Error in Lua script for Ant {self.ant_id}: {e}")    
+            print(f"Error in Lua script for Ant: {e}")    
 
     
     def _on_memory_shift(self, evicted_value):
@@ -71,7 +83,7 @@ class Ant:
         print(f"Memory shifted, evicted: {evicted_value}")
 
 
-    def move(self, direction, magnitude):
+    def move(self, magnitude, direction ):
         """
         A method to move the ant (called by Lua).
         """

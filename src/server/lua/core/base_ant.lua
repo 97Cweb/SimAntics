@@ -15,6 +15,8 @@ end
 
 function Base_Ant:update()
     print("Lua received update for ant")
+	Base_Ant.emit_pheromone("danger",5)
+	Base_Ant.set_velocity(1, .2)
 end
 
 

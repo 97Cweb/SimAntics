@@ -29,7 +29,7 @@ class Simulation:
         self.players = {}
         
         self.terrain_grid = TerrainGrid(self.lua, x, y)
-        self.gas_grid = PheromoneManager(self.lua, x, y)
+        self.pheromone_manager = PheromoneManager(self.lua, x, y)
 
         # Load Lua scripts
         base_path, mods_path = "lua", "mods"
@@ -44,10 +44,10 @@ class Simulation:
             raise RuntimeError("Update scripts not found.")
 
     def save(self):
-        SimulationSaver.save(self.save_name, self.frame_counter, self.mod_list, self.terrain_grid, self.gas_grid, self.players)
+        SimulationSaver.save(self.save_name, self.frame_counter, self.mod_list, self.terrain_grid, self.pheromone_manager, self.players)
 
     def load(self):
-        self.frame_counter, self.grid, self.gas_grid, self.players = SimulationSaver.load(self.lua, self.save_name)
+        self.frame_counter, self.grid, self.pheromone_manager, self.players = SimulationSaver.load(self.lua, self.save_name)
 
     def start(self, server_outbound_queue):
         self.save()
@@ -81,11 +81,11 @@ class Simulation:
 
         if current_time - self.last_gas_update >= self.gas_update_interval:
             self.last_gas_update = current_time
-            self.gas_grid.update(self.gas_update_func,self.frame_counter)
+            self.pheromone_manager.update(self.gas_update_func,self.frame_counter)
             state_updated = True
 
         if state_updated:
-            self.broadcast_update({"frame": self.frame_counter, "map": self.terrain_grid, "gas": self.gas_grid})
+            self.broadcast_update({"frame": self.frame_counter, "map": self.terrain_grid, "gas": self.pheromone_manager})
 
 
         for player in self.players.values():
@@ -117,7 +117,7 @@ class Simulation:
         SimulationSaver.create_player_folder(self.save_name,username)
         
         # Add player to simulation
-        self.players[username] = Player(username, self.save_name)
+        self.players[username] = Player(username, self.save_name, self.pheromone_manager)
         print(f"Player {username} added to the simulation.")
 
 
