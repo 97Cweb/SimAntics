@@ -21,7 +21,7 @@ class Player:
         
         self._initialize_lua_environment()
         
-        self.add_nest(Nest())
+        #self.add_nest(Nest())
         
     def update(self):
         self._update_nests()

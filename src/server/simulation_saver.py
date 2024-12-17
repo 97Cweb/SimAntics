@@ -11,15 +11,15 @@ class SimulationSaver:
         return save_path
 
     @staticmethod
-    def save(save_name, frame_counter, mods, grid, gas_grid, players):
+    def save(save_name, frame_counter, mods, terrain_grid, gas_grid, players):
         save_path = SimulationSaver.create_save_folder(save_name)
         save_data = {
             "version": "0.0.1",
             "frame_counter": frame_counter,
             "mods": mods,
             "simulation_state": {
-                "grid": SimulationSaver.format_grid(grid),
-                "gas_grid": SimulationSaver.format_grid(gas_grid),
+                "terrain_grid": SimulationSaver.format_grid(terrain_grid.grid),
+                "gas_grid": SimulationSaver.format_grid(gas_grid.grid),
                 "players": players,
             },
         }
@@ -39,11 +39,11 @@ class SimulationSaver:
 
         # Restore grids and other states
         frame_counter = save_data["frame_counter"]
-        grid = SimulationSaver.load_grid(lua_runtime, save_data["simulation_state"]["grid"])
+        terrain_grid = SimulationSaver.load_grid(lua_runtime, save_data["simulation_state"]["terrain_grid"])
         gas_grid = SimulationSaver.load_grid(lua_runtime, save_data["simulation_state"]["gas_grid"])
         players = save_data["simulation_state"]["players"]
 
-        return frame_counter, grid, gas_grid, players
+        return frame_counter, terrain_grid, gas_grid, players
 
     @staticmethod
     def format_grid(grid):
