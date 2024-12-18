@@ -10,7 +10,7 @@ def main():
 
     # Initialize server and simulation
     
-    simulation = Simulation(save_name = "test1",x=3,y=3, map_update_interval=0.5, gas_update_interval= 1.0)
+    simulation = Simulation(save_name = "test1",x=3,y=3, map_update_interval=0.5, gas_update_interval= 1.0, max_player_gas_count=1)
     
     # # Load or start fresh
     # load_save = input("Load a save? (y/n): ").strip().lower()

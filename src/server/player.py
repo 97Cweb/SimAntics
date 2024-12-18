@@ -24,7 +24,7 @@ class Player:
         self.lua_scripts = {}  # Dictionary for loaded scripts
         
         self._initialize_lua_environment()
-        self._redirect_lua_print()
+        
         
         self.add_nest(Nest(self, self.pheromone_manager))
         
@@ -52,6 +52,8 @@ class Player:
 
             # Load player-specific scripts (player_ant, player_nest)
             self._load_player_scripts()
+            
+            self._redirect_lua_print()
 
             self.scripts_loaded = True
             print(f"Lua environment initialized for player: {self.username}")
@@ -103,7 +105,7 @@ class Player:
         if os.path.exists(pheromone_file):
             with open(pheromone_file, "r") as f:
                 pheromone_definitions = json5.load(f)
-                self.pheromone_manager.register_pheromones(self.username, pheromone_definitions)
+                self.pheromone_manager.register_pheromones(self, pheromone_definitions)
                 print(f"Pheromones registered for player {self.username}")
         else:
             print(f"No pheromone definition file found for player {self.username}")        

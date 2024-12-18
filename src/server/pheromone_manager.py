@@ -2,7 +2,7 @@ import uuid
 from collections import defaultdict
 
 class PheromoneManager:
-    def __init__(self,lua_runtime, width, height ):
+    def __init__(self,lua_runtime, width, height, max_player_gas_count=32 ):
         """
         Initialize the pheromone manager.
 
@@ -14,6 +14,7 @@ class PheromoneManager:
         self.lua_runtime = lua_runtime
         self.width = width
         self.height = height
+        self.max_player_gas_count = max_player_gas_count
 
         # Pheromone grid: Each cell contains a defaultdict of {UUID: amount}
         self.grid = defaultdict(lambda: [[0.0 for _ in range(width)] for _ in range(height)])
@@ -25,18 +26,26 @@ class PheromoneManager:
         # Reverse mapping for UUID lookup
         self.uuid_to_pheromone = {}  # UUID -> (player_id, pheromone_name)
         
-    def register_pheromones(self, player_id, definitions):
+    def register_pheromones(self, player, definitions):
         """
         Register multiple pheromones for a player.
 
         Args:
-            player_id (str): Player's unique ID.
+            player (Player): Player
             definitions (list): List of pheromone definitions (dicts with name, decay, diffusion).
         """
+        player_id = player.username
+        
+        num_definitions = len(definitions)
+        num_existing_pheromones = len(self.pheromone_definitions[player_id])
+        if num_definitions + num_existing_pheromones > self.max_player_gas_count:
+            player.print(f"Player {player_id} trying to add too many pheromones. Existing {num_existing_pheromones} + new {num_definitions} is greater than {self.max_player_gas_count}")
+            
         for definition in definitions:
             name = definition.get("name")
             decay = definition.get("decay", 0.1)
             diffusion = definition.get("diffusion", 0.25)
+            col = definition.get("col", "#000000")
 
             # Avoid duplicates
             if any(p['name'] == name for p in self.pheromone_definitions[player_id]):
@@ -49,7 +58,8 @@ class PheromoneManager:
                 "name": name,
                 "uuid": pheromone_uuid,
                 "decay": decay,
-                "diffusion": diffusion
+                "diffusion": diffusion,
+                "col": col
             })
 
             # Update reverse mapping

@@ -13,7 +13,7 @@ from simulation_saver import SimulationSaver
 
 
 class Simulation:
-    def __init__(self, save_name, x=10, y=10, map_update_interval=1.0, gas_update_interval=1.0):
+    def __init__(self, save_name, x=10, y=10, map_update_interval=1.0, gas_update_interval=1.0,max_player_gas_count=32):
         self.lua = LuaRuntime(unpack_returned_tuples=True)
         self.save_name = save_name
         self.server = None
@@ -23,6 +23,7 @@ class Simulation:
         self.last_map_update = time.time()
         self.last_gas_update = time.time()
         
+        
         self.frame_counter = 0
         self.running = False
         
@@ -30,7 +31,7 @@ class Simulation:
         self.players = {}
         
         self.terrain_grid = TerrainGrid(self.lua, x, y)
-        self.pheromone_manager = PheromoneManager(self.lua, x, y)
+        self.pheromone_manager = PheromoneManager(self.lua, x, y, max_player_gas_count=max_player_gas_count)
 
         # Load Lua scripts
         base_path, mods_path = "lua", "mods"
