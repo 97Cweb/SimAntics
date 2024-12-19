@@ -1,7 +1,0 @@
-{
-    grid: {},
-    pheromone_definitions: {
-        cb: [],
-    },
-    uuid_to_pheromone: {},
-}

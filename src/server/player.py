@@ -53,7 +53,11 @@ class Player:
             self._load_core_scripts()
 
             # Load player-specific scripts (player_ant, player_nest)
-            self._load_player_scripts()
+            
+            if self.is_human:
+                self._load_human_player_scripts()
+            else:
+                self._load_ai_player_scripts()
             
             self._redirect_lua_print()
 
@@ -78,7 +82,7 @@ class Player:
         These scripts reside in the 'lua/setup' folder.
         """
         setup_scripts_dir = "lua/setup"
-        load_scripts_from_folder(self.lua_runtime, setup_scripts_dir, self.lua_scripts, global_reference=True)
+        LuaLoader.load_scripts_from_folder(self.lua_runtime, setup_scripts_dir, self.lua_scripts, global_reference=True)
         print(f"Core scripts loaded for player: {self.username}")
 
             
@@ -87,17 +91,42 @@ class Player:
         Load the base scripts (`base_ant`, `base_nest`) into the Lua environment.
         """
         core_scripts_dir = "lua/core"
-        load_scripts_from_folder(self.lua_runtime, core_scripts_dir, self.lua_scripts, global_reference=True)
+        LuaLoader.load_scripts_from_folder(self.lua_runtime, core_scripts_dir, self.lua_scripts, global_reference=True)
         print(f"Core scripts loaded for player: {self.username}")
             
-    def _load_player_scripts(self):
+    def _load_human_player_scripts(self):
         """
         Load player-specific Lua scripts, such as `player_ant` and `player_nest`.
         """
         player_scripts_dir = os.path.join("saves", self.save_name, "players", self.username)
-        load_scripts_from_folder(self.lua_runtime, player_scripts_dir, self.lua_scripts, global_reference=True)
+        LuaLoader.load_scripts_from_folder(self.lua_runtime, player_scripts_dir, self.lua_scripts, global_reference=True)
         print(f"Player-specific scripts loaded for {self.username}")
 
+    def _load_ai_player_scripts(self):
+        """
+        Load scripts for AI players from the mods directory.
+        Dynamically find the player's folder inside the mods/<modname>/players structure.
+        """
+        mods_path = "mods"
+        player_scripts_dir = None
+    
+        # Search for the player's folder across all mods
+        for mod_name in os.listdir(mods_path):
+            mod_path = os.path.join(mods_path, mod_name)
+            players_path = os.path.join(mod_path, "players")
+            if os.path.isdir(players_path):
+                player_path = os.path.join(players_path, self.username)
+                if os.path.isdir(player_path):
+                    player_scripts_dir = player_path
+                    break
+    
+        if not player_scripts_dir:
+            print(f"Error: AI player scripts for '{self.username}' not found in mods.")
+            return
+    
+        # Load scripts for the AI player
+        LuaLoader.load_scripts_from_folder(self.lua_runtime, player_scripts_dir, self.lua_scripts, global_reference=True)
+        print(f"AI player scripts loaded for {self.username} from {player_scripts_dir}")
 
     def _load_pheromone_definitions(self):
         """

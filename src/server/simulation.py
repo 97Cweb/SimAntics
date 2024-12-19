@@ -34,20 +34,92 @@ class Simulation:
         self.terrain_grid = TerrainGrid(self.lua, x, y)
         self.pheromone_manager = PheromoneManager(self.lua, x, y, max_player_gas_count=max_player_gas_count)
 
-        # Load core and mod Lua scripts
+        # Load core and replaceable Lua scripts
         base_path = "lua"
         mods_path = "mods"
         core_scripts = LuaLoader.load_scripts_from_folder(self.lua, os.path.join(base_path, "core"))
         replaceable_scripts = LuaLoader.load_scripts_from_folder(self.lua, os.path.join(base_path, "replaceable"))
-        mod_scripts = LuaLoader.load_scripts_from_folder(self.lua, mods_path)
 
-        # Merge core, replaceable, and mod scripts
-        self.lua_scripts = {**core_scripts, **replaceable_scripts, **mod_scripts}
+        # Process mods
+        mod_replaceable_scripts, mod_players_scripts = self._process_mods(mods_path)
+
+        # Merge scripts, giving priority to mods
+        self.lua_scripts = {**core_scripts, **replaceable_scripts, **mod_replaceable_scripts}
         print("Loaded Lua scripts:", self.lua_scripts)
+        print(mod_players_scripts)
+
+        # Create AI players from player mods
+        self._initialize_ai_players(mod_players_scripts)
+
+        # Initialize Lua functions
+        self._initialize_lua_functions()
+        
+    
+    def _process_mods(self, mods_path):
+        """
+        Process all mods in the 'mods' folder.
+
+        Args:
+            mods_path: Path to the 'mods' folder.
+
+        Returns:
+            - A dictionary of replaceable scripts from mods.
+            - A dictionary of player definitions from mods.
+        """
+        mod_replaceable_scripts = {}
+        mod_players_scripts = {}
+
+        if not os.path.exists(mods_path):
+            print(f"Warning: Mods path '{mods_path}' does not exist.")
+            return mod_replaceable_scripts, mod_players_scripts
+
+        for mod_name in os.listdir(mods_path):
+            
+            mod_path = os.path.join(mods_path, mod_name)
+            if not os.path.isdir(mod_path):
+                print(f"Skipping '{mod_name}' as it is not a directory.")
+                continue
+
+            # Check for mod.json
+            mod_metadata_path = os.path.join(mod_path, "mod.json")
+            if not os.path.exists(mod_metadata_path):
+                print(f"Mod '{mod_name}' is missing 'mod.json', skipping.")
+                continue
+
+            
+            # Process 'replaceable' folder
+            replaceable_path = os.path.join(mod_path, "replaceable")
+            if os.path.isdir(replaceable_path):
+                replaceable_scripts = LuaLoader.load_scripts_from_folder(self.lua, replaceable_path)
+                mod_replaceable_scripts.update(replaceable_scripts)
+
+            # Process 'players' folder
+            players_path = os.path.join(mod_path, "players")
+            if os.path.isdir(players_path):
+                
+                for player_name in os.listdir(players_path):
+                    player_path = os.path.join(players_path, player_name)
+                    if os.path.isdir(player_path):
+                        player_script = LuaLoader.load_scripts_from_folder(self.lua, player_path)
+                        mod_players_scripts[player_name] = player_script
+
+        return mod_replaceable_scripts, mod_players_scripts
 
         
-        
-        self._initialize_lua_functions()
+    def _initialize_ai_players(self, mod_players_scripts):
+        """
+        Create AI players from the processed player definitions in mods.
+
+        Args:
+            mod_players_scripts: Dictionary of player definitions from mods.
+        """
+        for player_name, script in mod_players_scripts.items():
+            if script is None:
+                print(f"Warning: Player '{player_name}' failed to load.")
+                continue
+            print(f"Creating AI player '{player_name}'")
+            self.create_player(player_name, is_human=False)
+
 
     def _initialize_lua_functions(self):
         try:
@@ -116,14 +188,13 @@ class Simulation:
             print(f"Unhandled command: {command}")
 
     # New player-related methods
-    def create_player(self, username):
+    def create_player(self, username, is_human=True):
         """Create a new player in the simulation and generate their folder and Lua scripts."""
         if username in self.players:
             print(f"Player {username} already exists.")
             return
 
-        else:
-            print("here")
+        elif is_human:
             # Create player folder
             SimulationSaver.create_player_folder(self.save_name,username)
         

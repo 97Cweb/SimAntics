@@ -1,7 +1,0 @@
-{
-    host: "127.0.0.1",
-    port: 65432,
-    udp_port: 65433,
-    inactivity_timeout: 15,
-    message_interval_rate: 5,
-}
