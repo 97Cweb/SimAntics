@@ -1,14 +1,15 @@
 import time
 import threading
+import os
 from queue import Queue
 
-from lua_handlers import LuaHandlers
 from lupa import LuaRuntime
 
 from pheromone_manager import PheromoneManager
 from terrain_grid import TerrainGrid
 from player import Player
 from simulation_saver import SimulationSaver
+from simantics_common.lua_loader import LuaLoader
 
 
 
@@ -33,17 +34,29 @@ class Simulation:
         self.terrain_grid = TerrainGrid(self.lua, x, y)
         self.pheromone_manager = PheromoneManager(self.lua, x, y, max_player_gas_count=max_player_gas_count)
 
-        # Load Lua scripts
-        base_path, mods_path = "lua", "mods"
-        self.lua_scripts, self.mod_list = LuaHandlers.load_lua_scripts(self.lua, base_path, mods_path)
-        print(self.lua_scripts)
+        # Load core and mod Lua scripts
+        base_path = "lua"
+        mods_path = "mods"
+        core_scripts = LuaLoader.load_scripts_from_folder(self.lua, os.path.join(base_path, "core"))
+        replaceable_scripts = LuaLoader.load_scripts_from_folder(self.lua, os.path.join(base_path, "replaceable"))
+        mod_scripts = LuaLoader.load_scripts_from_folder(self.lua, mods_path)
+
+        # Merge core, replaceable, and mod scripts
+        self.lua_scripts = {**core_scripts, **replaceable_scripts, **mod_scripts}
+        print("Loaded Lua scripts:", self.lua_scripts)
+
+        
+        
         self._initialize_lua_functions()
 
     def _initialize_lua_functions(self):
-        self.map_update_func = self.lua_scripts["map_update"].map_update
-        self.gas_update_func = self.lua_scripts["gas_update"].gas_update
-        if not self.map_update_func or not self.gas_update_func:
-            raise RuntimeError("Update scripts not found.")
+        try:
+            self.map_update_func = self.lua_scripts.get("map_update")
+            self.gas_update_func = self.lua_scripts.get("gas_update")
+            if not self.map_update_func or not self.gas_update_func:
+                raise RuntimeError("Update scripts not found.")
+        except Exception as e:
+            raise RuntimeError(f"Error initializing Lua functions: {e}")
 
     def start(self, server_outbound_queue):
         SimulationSaver.save_simulation(self, self.save_name)

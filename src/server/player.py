@@ -3,7 +3,7 @@ import os
 from lupa import LuaRuntime
 from lupa.lua54 import LuaError
 
-from simantics_common.lua_loader import load_scripts_from_folder
+from simantics_common.lua_loader import LuaLoader
 from nest import Nest
 
 class Player:
