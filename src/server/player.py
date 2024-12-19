@@ -7,23 +7,25 @@ from simantics_common.lua_loader import load_scripts_from_folder
 from nest import Nest
 
 class Player:
-    def __init__(self, username, save_name, pheromone_manager, message_callback, is_human=True, ):
+    def __init__(self, username, save_name, pheromone_manager,  is_human=True, message_callback = None):
         self.username = username
         self.is_human = is_human
         self.client = None  # To track the connected client socket
         self.save_name = save_name
-        self.message_callback = message_callback  # Callback for sending messages
-        
-        
+                
         self.lua_runtime = LuaRuntime(unpack_returned_tuples=True)  # Player-specific Lua environment
         self.nests = []
         self.pheromone_manager = pheromone_manager
-        self.pheromone_definitions = []
         
         self.scripts_loaded = False
         self.lua_scripts = {}  # Dictionary for loaded scripts
         
+        self.message_callback = message_callback
+        
+        
+        
         self._initialize_lua_environment()
+        
         
         
         self.add_nest(Nest(self, self.pheromone_manager))

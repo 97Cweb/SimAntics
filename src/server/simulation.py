@@ -17,12 +17,12 @@ class Simulation:
         self.lua = LuaRuntime(unpack_returned_tuples=True)
         self.save_name = save_name
         self.server = None
+        self.message_callback = None
         
         self.map_update_interval = map_update_interval
         self.gas_update_interval = gas_update_interval
         self.last_map_update = time.time()
         self.last_gas_update = time.time()
-        
         
         self.frame_counter = 0
         self.running = False
@@ -45,14 +45,8 @@ class Simulation:
         if not self.map_update_func or not self.gas_update_func:
             raise RuntimeError("Update scripts not found.")
 
-    def save(self):
-        SimulationSaver.save(self.save_name, self.frame_counter, self.mod_list, self.terrain_grid, self.pheromone_manager, self.players)
-
-    def load(self):
-        self.frame_counter, self.grid, self.pheromone_manager, self.players = SimulationSaver.load(self.lua, self.save_name)
-
     def start(self, server_outbound_queue):
-        self.save()
+        SimulationSaver.save_simulation(self, self.save_name)
         self.running = True
         self.server_outbound_queue = server_outbound_queue
         threading.Thread(target=self.run, daemon=True).start()
@@ -115,11 +109,13 @@ class Simulation:
             print(f"Player {username} already exists.")
             return
 
-        # Create player folder
-        SimulationSaver.create_player_folder(self.save_name,username)
+        else:
+            print("here")
+            # Create player folder
+            SimulationSaver.create_player_folder(self.save_name,username)
         
         # Add player to simulation
-        self.players[username] = Player(username, self.save_name, self.pheromone_manager, message_callback = self.server.message_throttler.add_message)
+        self.players[username] = Player(username, self.save_name, self.pheromone_manager, message_callback=self.message_callback)
         print(f"Player {username} added to the simulation.")
 
 
@@ -128,3 +124,5 @@ class Simulation:
         
     def set_server(self, server):
         self.server = server
+        self.message_callback = self.server.message_throttler.add_message
+        

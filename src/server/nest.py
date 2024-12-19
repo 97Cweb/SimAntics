@@ -7,7 +7,6 @@ class Nest:
         self.player = player
         self.pheromone_manager = pheromone_manager
         self.memory = Memory(max_len=memory_size, default_value=None, shift_callback=self._on_memory_shift)
-        self.spawn_callback = spawn_callback  # Callback to spawn ants into the simulation
         self.ants = []
         
         self.spawn_ant()
@@ -21,9 +20,6 @@ class Nest:
         """Spawn a new Ant and notify the simulation."""
         new_ant = Ant(player= self.player, pheromone_manager= self.pheromone_manager, x=self.x, y = self.y)
         self.ants.append(new_ant)
-        if self.spawn_callback:
-            self.spawn_callback(new_ant)
-            self.player.print("Nest spawned Ant")
             
     def emit_pheromone(self, pheromone_name, amount):
         pheromone_uuid = self.pheromone_manager.get_pheromone_uuid(self.player.username, pheromone_name)

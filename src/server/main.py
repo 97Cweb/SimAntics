@@ -45,10 +45,10 @@ def main():
     server.stop()
     simulation.stop()
 
-    # # Save the game before exiting
+    # Save the game before exiting
     # save_game = input("Save the game? (y/n): ").strip().lower()
     # if save_game == "y":
-    #     simulation.save()
+    #      simulation.save("test1")
 
 
 if __name__ == "__main__":

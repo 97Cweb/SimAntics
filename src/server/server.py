@@ -184,10 +184,11 @@ class Server(threading.Thread):
         """
         try:
             client_connection = self.connected_clients.get(username)
+            message = (json5.dumps({"type": "message", "content": message}) + "\n").encode('utf-8')
+            #print(message)
             if client_connection:
-                client_connection.client_socket.sendall(
-                    (json5.dumps({"type": "message", "content": message}) + "\n").encode('utf-8')
-                )
+                client_connection.client_socket.sendall(message)
+                    
             else:
                 print(f"[Warning] Attempted to send message to {username}, but they are not connected.")
         except Exception as e:
