@@ -20,7 +20,8 @@ class Player:
         self.scripts_loaded = False
         self.lua_scripts = {}  # Dictionary for loaded scripts
         
-        self.message_callback = message_callback
+        # Default message callback to a simple logger if not provided
+        self.message_callback = message_callback or self._default_message_logger
         
         
         
@@ -82,7 +83,7 @@ class Player:
         These scripts reside in the 'lua/setup' folder.
         """
         setup_scripts_dir = "lua/setup"
-        LuaLoader.load_scripts_from_folder(self.lua_runtime, setup_scripts_dir, self.lua_scripts, global_reference=True)
+        self.lua_scripts.update(LuaLoader.load_scripts_from_folder(self.lua_runtime, setup_scripts_dir))
         print(f"Core scripts loaded for player: {self.username}")
 
             
@@ -91,7 +92,7 @@ class Player:
         Load the base scripts (`base_ant`, `base_nest`) into the Lua environment.
         """
         core_scripts_dir = "lua/core"
-        LuaLoader.load_scripts_from_folder(self.lua_runtime, core_scripts_dir, self.lua_scripts, global_reference=True)
+        self.lua_scripts.update(LuaLoader.load_scripts_from_folder(self.lua_runtime, core_scripts_dir))
         print(f"Core scripts loaded for player: {self.username}")
             
     def _load_human_player_scripts(self):
@@ -99,49 +100,70 @@ class Player:
         Load player-specific Lua scripts, such as `player_ant` and `player_nest`.
         """
         player_scripts_dir = os.path.join("saves", self.save_name, "players", self.username)
-        LuaLoader.load_scripts_from_folder(self.lua_runtime, player_scripts_dir, self.lua_scripts, global_reference=True)
+        self.lua_scripts.update(LuaLoader.load_scripts_from_folder(self.lua_runtime, player_scripts_dir))
         print(f"Player-specific scripts loaded for {self.username}")
 
     def _load_ai_player_scripts(self):
         """
         Load scripts for AI players from the mods directory.
-        Dynamically find the player's folder inside the mods/<modname>/players structure.
         """
-        mods_path = "mods"
-        player_scripts_dir = None
-    
-        # Search for the player's folder across all mods
-        for mod_name in os.listdir(mods_path):
-            mod_path = os.path.join(mods_path, mod_name)
-            players_path = os.path.join(mod_path, "players")
-            if os.path.isdir(players_path):
-                player_path = os.path.join(players_path, self.username)
-                if os.path.isdir(player_path):
-                    player_scripts_dir = player_path
-                    break
+        player_scripts_dir = self._find_mod_player_path(self.username)
     
         if not player_scripts_dir:
             print(f"Error: AI player scripts for '{self.username}' not found in mods.")
             return
     
         # Load scripts for the AI player
-        LuaLoader.load_scripts_from_folder(self.lua_runtime, player_scripts_dir, self.lua_scripts, global_reference=True)
+        self.lua_scripts.update(LuaLoader.load_scripts_from_folder(self.lua_runtime, player_scripts_dir))
         print(f"AI player scripts loaded for {self.username} from {player_scripts_dir}")
-
+        
     def _load_pheromone_definitions(self):
         """
         Initialize pheromones for this player by loading definitions.
+        For human players, load from the saves directory.
+        For AI players, load from the mods directory.
         """
-        pheromone_file = os.path.join("saves", self.save_name, "players", self.username, "pheromones.json")
-        if os.path.exists(pheromone_file):
-            with open(pheromone_file, "r") as f:
-                pheromone_definitions = json5.load(f)
-                self.pheromone_manager.register_pheromones(self, pheromone_definitions)
-                print(f"Pheromones registered for player {self.username}")
+        if self.is_human:
+            # Path for human players
+            pheromone_file = os.path.join("saves", self.save_name, "players", self.username, "pheromones.json")
         else:
-            print(f"No pheromone definition file found for player {self.username}")        
-
+            # Path for AI players
+            player_scripts_dir = self._find_mod_player_path(self.username)
+            pheromone_file = os.path.join(player_scripts_dir, "pheromones.json") if player_scripts_dir else None
     
+        if pheromone_file and os.path.exists(pheromone_file):
+            try:
+                with open(pheromone_file, "r") as f:
+                    pheromone_definitions = json5.load(f)
+                    self.pheromone_manager.register_pheromones(self, pheromone_definitions)
+                    print(f"Pheromones registered for player {self.username}")
+            except Exception as e:
+                print(f"[Error] Failed to load pheromone definitions for {self.username}: {e}")
+        else:
+            print(f"No pheromone definition file found for player {self.username}")
+
+    def _find_mod_player_path(self, player_name):
+        """
+        Locate the path to a player's folder inside the mods directory.
+    
+        Args:
+            player_name: The name of the player to locate.
+    
+        Returns:
+            The path to the player's folder if found, or None otherwise.
+        """
+        mods_path = "mods"
+        for mod_name in os.listdir(mods_path):
+            mod_path = os.path.join(mods_path, mod_name)
+            players_path = os.path.join(mod_path, "players")
+            if os.path.isdir(players_path):
+                player_path = os.path.join(players_path, player_name)
+                if os.path.isdir(player_path):
+                    return player_path
+        return None
+    
+
+
     def add_nest(self, nest):
         """
         Add an nest to the player's list of nests.
@@ -151,6 +173,10 @@ class Player:
         """
         self.nests.append(nest)
         print(f"Nest added for player {self.username}. Total nests: {len(self.nests)}")
+        
+        
+    def _default_message_logger(self, username, message):
+        print(f"[{username}]: {message}")
         
     def _redirect_lua_print(self):
         """

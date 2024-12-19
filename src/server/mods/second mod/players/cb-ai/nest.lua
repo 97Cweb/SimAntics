@@ -1,4 +1,4 @@
-local Nest = Base_Nest:extend()
+Nest = Base_Nest:extend()
 function Nest:initialize()
     Nest.initialize(self)
 end

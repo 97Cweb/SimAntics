@@ -1,0 +1,12 @@
+[
+    {
+        name: "first mod",
+        enabled: true,
+        load_order: 0,
+    },
+    {
+        name: "second mod",
+        enabled: false,
+        load_order: 1,
+    },
+]

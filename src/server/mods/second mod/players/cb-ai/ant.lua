@@ -1,4 +1,4 @@
-local Ant = Base_Ant:extend()
+Ant = Base_Ant:extend()
 
 function Ant:initialize()
 	Ant.initialize(self)

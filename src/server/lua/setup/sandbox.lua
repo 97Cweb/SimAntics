@@ -21,3 +21,5 @@ function create_sandbox()
     setmetatable(sandbox, mt)
     return sandbox
 end
+
+return create_sandbox
