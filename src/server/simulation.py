@@ -12,6 +12,7 @@ from player import Player
 from simulation_saver import SimulationSaver
 from simantics_common.lua_loader import LuaLoader
 
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,  # Change to DEBUG for more detailed logs
@@ -19,6 +20,13 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
+
+if not logger.hasHandlers():
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    logger.addHandler(console_handler)
+    logger.info("Default console logging is active.")
+
 
 
 class Simulation:
@@ -212,3 +220,13 @@ class Simulation:
     def set_server(self, server):
         self.server = server
         self.message_callback = self.server.message_throttler.add_message
+
+    def add_log_handler(self,handler):
+        """
+        Attach a log handler dynamically.
+    
+        Args:
+            handler: A logging.Handler instance to attach.
+        """
+        logger.addHandler(handler)
+        logger.info("A new log handler has been attached.")

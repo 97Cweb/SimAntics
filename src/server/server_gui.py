@@ -2,15 +2,34 @@ import os
 import pygame
 import pygame_gui
 import threading
-import time
+import logging
+import json5
+
 from server import Server
 from simulation import Simulation
 from simulation_saver import SimulationSaver
+from server_gui_log_handler import ServerGUILogHandler
 
 
+
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,  # Default log level
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger(__name__)  # Use the module's name for the logger
 class ServerGUI:
     def __init__(self):
+        pygame.quit()
         pygame.init()
+        pygame.font.quit()
+        pygame.font.init()
+        
+        print("Pygame initialized:", pygame.get_init())
+        print("Font initialized:", pygame.font.get_init())
+        print("Display initialized:", pygame.display.get_init())
 
         # Window settings
         self.window_size = (800, 600)
@@ -24,39 +43,46 @@ class ServerGUI:
 
         # Configuration settings
         self.simulation_config = {
-            "x": 10,
-            "y": 10,
-            "map_update_interval": 1.0,
-            "gas_update_interval": 1.0,
-            "max_player_gas_count": 32,
-            "save_name": "temp",
+            "save_name": "",
+            "x": "",
+            "y": "",
+            "map_update_interval": "",
+            "gas_update_interval": "",
+            "max_player_gas_count": "",
+            
         }
         self.server_config = {
-            "port": 65432,
-            "udp_port": 65433,
-            "inactivity_timeout": 15,
-            "message_interval_rate": 5,
+            "port": "",
+            "udp_port": "",
+            "inactivity_timeout": "",
+            "message_interval_rate": "",
         }
-
+        
+        self.inactive_mod_list_gui = None
+        self.active_mod_list_gui = None    
+        
+        self.mods_config = []
+        self.loaded_mod_list = []
+        self.load_mods(is_new_game=True)
+        
+        if any(isinstance(h, ServerGUILogHandler) for h in logger.handlers):
+            # Remove the old handler
+            for h in logger.handlers:
+                if isinstance(h, ServerGUILogHandler):
+                    logger.removeHandler(h)
+                    h.close()  # Close the old handler properly
+        
+        # Add a new handler
+        gui_handler = ServerGUILogHandler(self)
+        gui_handler.setLevel(logging.INFO)
+        logger.addHandler(gui_handler)
+        self.gui_handler = gui_handler
+        
+        
         # Server and Simulation
-        self.simulation = Simulation(
-            save_name=self.simulation_config["save_name"],
-            x=self.simulation_config["x"],
-            y=self.simulation_config["y"],
-            map_update_interval=self.simulation_config["map_update_interval"],
-            gas_update_interval=self.simulation_config["gas_update_interval"],
-            max_player_gas_count=self.simulation_config["max_player_gas_count"],
-        )
-        self.server = Server(
-            simulation=self.simulation,
-            host="127.0.0.1",
-            port=self.server_config["port"],
-            udp_port=self.server_config["udp_port"],
-            inactivity_timeout=self.server_config["inactivity_timeout"],
-            message_interval_rate=self.server_config["message_interval_rate"],
-        )
-        self.simulation.set_server(self.server)
-
+        self.simulation = None
+        self.server = None
+        
         # Tab Container
         self.tab_container = pygame_gui.elements.UITabContainer(
             relative_rect=pygame.Rect((0, 50), (800, 550)),
@@ -69,9 +95,53 @@ class ServerGUI:
         self.create_config_tab()
         self.create_run_tab()
 
+            
+
         # Control flags
         self.popup_window = None
         self.running = True
+        
+    
+    def load_mods(self, is_new_game):
+        """Load mods from the mods folder."""
+        self.mods_folder = "mods"
+        if not os.path.exists(self.mods_folder):
+            os.makedirs(self.mods_folder)
+
+        self.mods_config = []
+        for mod in os.listdir(self.mods_folder):
+            self.mods_config.append({
+                "name": mod,
+                "enabled": False,
+                "load_order": len(self.mods_config),
+            })
+            
+        print(self.loaded_mod_list)
+             
+        if not is_new_game:
+            for active_mod in self.loaded_mod_list:
+                for mod in self.mods_config:
+                    if mod["name"] == active_mod["name"]:
+                        mod["enabled"] = active_mod["enabled"]
+                        mod["load_order"] = active_mod["load_order"]
+                            
+        # Sort mods_config by load order for active mods
+        self.mods_config.sort(key=lambda mod: mod["load_order"] if mod["enabled"] else float("inf"))
+    
+    
+        if self.inactive_mod_list_gui and self.active_mod_list_gui:
+            self.inactive_mod_list_gui.set_item_list([mod["name"] for mod in self.mods_config if not mod["enabled"]])
+            self.active_mod_list_gui.set_item_list([mod["name"] for mod in self.mods_config if mod["enabled"]])
+            
+        
+
+        
+
+    def save_mods(self):
+        """Save the current mod configuration to mods.json."""
+        mods_file = os.path.join("saves", self.simulation_config["save_name"], "mods.json")
+        with open(mods_file, "w") as f:
+            json5.dump(self.mods_config, f, indent=4)
 
     def create_config_tab(self):
         """Create the configuration tab with load/save functionality."""
@@ -86,11 +156,47 @@ class ServerGUI:
         self.server_fields = self.create_config_fields(
             self.server_config, config_tab_panel, y_offset=250
         )
+        
+        # Mods Panel
+        mods_panel = pygame_gui.elements.UIPanel(
+            relative_rect=pygame.Rect((500, 10), (280, 400)),
+            manager=self.manager,
+            container=config_tab_panel,
+        )
+        
+        pygame_gui.elements.UILabel(
+            relative_rect=pygame.Rect((10, 10), (260, 30)),
+            text="Mods Configuration:",
+            manager=self.manager,
+            container=mods_panel,
+        )
+
+        self.inactive_mod_list_gui = pygame_gui.elements.UISelectionList(
+            relative_rect=pygame.Rect((10, 50), (120, 300)),
+            item_list=[mod["name"] for mod in self.mods_config if not mod["enabled"]],
+            manager=self.manager,
+            container=mods_panel,
+        )
+
+        self.active_mod_list_gui = pygame_gui.elements.UISelectionList(
+            relative_rect=pygame.Rect((150, 50), (120, 300)),
+            item_list=[mod["name"] for mod in self.mods_config if mod["enabled"]],
+            manager=self.manager,
+            container=mods_panel,
+        )
 
         # Load Save Button
         self.load_button = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((250, 450), (150, 50)),
             text="Load Save",
+            manager=self.manager,
+            container=config_tab_panel,
+        )
+        
+        # New Game Button
+        self.new_game_button = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((50, 450), (150, 50)),
+            text="New Game",
             manager=self.manager,
             container=config_tab_panel,
         )
@@ -114,6 +220,15 @@ class ServerGUI:
             manager=self.manager,
             container=run_tab_panel,
         )
+        
+        self.log_level_dropdown = pygame_gui.elements.UIDropDownMenu(
+            options_list=["DEBUG", "INFO", "WARNING", "ERROR"],
+            starting_option="INFO",
+            relative_rect=pygame.Rect((450, 400), (200, 30)),
+            manager=self.manager,
+            container=run_tab_panel,
+        )
+
 
         # Logs Panel
         self.logs_panel = pygame_gui.elements.ui_text_box.UITextBox(
@@ -122,12 +237,34 @@ class ServerGUI:
             manager=self.manager,
             container=run_tab_panel,
         )
+    
+    def handle_mod_transfer(self, event):
+        """Handle moving mods between active and inactive lists."""
+        if event.type == pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION:
+            
+            if event.ui_element == self.inactive_mod_list_gui:
+                mod_name = self.inactive_mod_list_gui.get_single_selection()
+                if mod_name:
+                    self.inactive_mod_list_gui.remove_items([mod_name])
+                    self.active_mod_list_gui.add_items([mod_name])
+                    for mod in self.mods_config:
+                        if mod["name"] == mod_name:
+                            mod["enabled"] = True
+            elif event.ui_element == self.active_mod_list_gui:
+                mod_name = self.active_mod_list_gui.get_single_selection()
+                if mod_name:
+                    self.active_mod_list_gui.remove_items([mod_name])
+                    self.inactive_mod_list_gui.add_items([mod_name])
+                    for mod in self.mods_config:
+                        if mod["name"] == mod_name:
+                            mod["enabled"] = False
+                    
 
     def create_config_fields(self, config, container, y_offset):
         """Create text input fields for configuration settings."""
         fields = {}
         for index, (key, value) in enumerate(config.items()):
-            label = pygame_gui.elements.UILabel(
+            pygame_gui.elements.UILabel(
                 relative_rect=pygame.Rect((50, y_offset + index * 40), (200, 30)),
                 text=f"{key}:",
                 manager=self.manager,
@@ -170,10 +307,94 @@ class ServerGUI:
                 field.enable()
             else:
                 field.disable()
+                
+    def create_new_game(self):
+        """Prompt for a new game save name and reset configuration."""
+        if self.popup_window:
+            return  # Prevent multiple popups
+
+        popup_rect = pygame.Rect((200, 150), (400, 200))
+        self.popup_window = pygame_gui.elements.UIWindow(
+            rect=popup_rect,
+            manager=self.manager,
+            window_display_title="New Game",
+        )
+
+        pygame_gui.elements.UILabel(
+            relative_rect=pygame.Rect((20, 20), (360, 30)),
+            text="Enter Save Name:",
+            manager=self.manager,
+            container=self.popup_window,
+        )
+
+        save_name_entry = pygame_gui.elements.UITextEntryLine(
+            relative_rect=pygame.Rect((20, 60), (360, 30)),
+            manager=self.manager,
+            container=self.popup_window,
+        )
+
+        ok_button = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((20, 120), (100, 40)),
+            text="OK",
+            manager=self.manager,
+            container=self.popup_window,
+        )
+
+        cancel_button = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((140, 120), (100, 40)),
+            text="Cancel",
+            manager=self.manager,
+            container=self.popup_window,
+        )
+
+        def handle_new_game(event):
+            nonlocal save_name_entry
+            if event.type == pygame_gui.UI_BUTTON_PRESSED:
+                if event.ui_element == ok_button:
+                    save_name = save_name_entry.get_text()
+                    if save_name:
+                        self.simulation_config = {
+                            "save_name": save_name,
+                            "x": 10,
+                            "y": 10,
+                            "map_update_interval": 1.0,
+                            "gas_update_interval": 1.0,
+                            "max_player_gas_count": 32,
+                            
+                        }
+                        self.server_config = {
+                            "port": 65432,
+                            "udp_port": 65433,
+                            "inactivity_timeout": 15,
+                            "message_interval_rate": 5,
+                        }
+
+                        self.populate_fields(self.simulation_fields, self.simulation_config)
+                        self.populate_fields(self.server_fields, self.server_config)
+                        self.load_mods(is_new_game= True)
+                        self.update_logs(f"New game created with save name: {save_name}")
+
+                    self.popup_window.kill()
+                    self.popup_window = None
+
+                elif event.ui_element == cancel_button:
+                    self.popup_window.kill()
+                    self.popup_window = None
+
+        self.popup_window_process_event = handle_new_game
 
     def start_stop_server(self):
         if not self.server_running:
             """Initialize and start the server."""
+            
+            # Validate mods
+            missing_mods = [mod["name"] for mod in self.mods_config if mod["enabled"] and mod["name"] not in [item["name"] for item in self.mods_config]]
+    
+            if missing_mods:
+                proceed_anyway = self.show_missing_mods_popup(missing_mods)
+                if not proceed_anyway:
+                    return
+            
             self.start_stop_button.set_text("...")
 
             # Disable configuration fields
@@ -201,6 +422,10 @@ class ServerGUI:
                 message_interval_rate=self.server_config["message_interval_rate"],
             )
             self.simulation.set_server(self.server)
+            self.simulation.add_log_handler(self.gui_handler)
+            
+            # Save mods configuration
+            self.save_mods()
 
             # Start server and simulation
             self.simulation_thread = threading.Thread(target=self.simulation.start, args=[self.server.outbound_queue], daemon=True)
@@ -227,6 +452,56 @@ class ServerGUI:
 
             self.update_logs("Server stopped.")
             self.start_stop_button.set_text("Start Server")
+            
+    def show_missing_mods_popup(self, missing_mods):
+        """Show a popup with missing mods."""
+        if self.popup_window:
+            return  # Prevent multiple popups
+
+        popup_rect = pygame.Rect((200, 150), (400, 300))
+        self.popup_window = pygame_gui.elements.UIWindow(
+            rect=popup_rect,
+            manager=self.manager,
+            window_display_title="Missing Mods",
+        )
+
+        mod_list = "<br>".join(missing_mods)
+        message = f"The following mods are missing:<br>{mod_list}"
+
+        pygame_gui.elements.UITextBox(
+            relative_rect=pygame.Rect((20, 20), (360, 200)),
+            html_text=message,
+            manager=self.manager,
+            container=self.popup_window,
+        )
+
+        continue_button = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((20, 240), (100, 40)),
+            text="Continue",
+            manager=self.manager,
+            container=self.popup_window,
+        )
+
+        cancel_button = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((140, 240), (100, 40)),
+            text="Cancel",
+            manager=self.manager,
+            container=self.popup_window,
+        )
+
+        def handle_missing_mods(event):
+            if event.type == pygame_gui.UI_BUTTON_PRESSED:
+                if event.ui_element == continue_button:
+                    self.popup_window.kill()
+                    self.popup_window = None
+                    return True
+                elif event.ui_element == cancel_button:
+                    self.popup_window.kill()
+                    self.popup_window = None
+                    return False
+
+        self.popup_window_process_event = handle_missing_mods
+
 
     def read_config_fields(self, fields, config):
         """Update config dictionary with values from GUI input fields."""
@@ -288,9 +563,10 @@ class ServerGUI:
                         self.popup_window = None
                         self.simulation_config["save_name"] = selected
 
-                        self.server = SimulationSaver.load_simulation(self.simulation, selected)
+                        self.simulation_config, self.server_config, self.loaded_mod_list = SimulationSaver.load_simulation_config(selected)
                         self.populate_fields(self.simulation_fields, self.simulation_config)
                         self.populate_fields(self.server_fields, self.server_config)
+                        self.load_mods(is_new_game= False)
                         self.update_logs(f"Selected save: {selected}")
 
                 elif event.ui_element == cancel_button:
@@ -311,19 +587,49 @@ class ServerGUI:
     def update_logs(self, message):
         """Update the logs panel."""
         current_text = self.logs_panel.html_text
-        updated_text = current_text + f"<br>{message}"
-        self.logs_panel.kill()  # Remove the old text box
-        self.logs_panel = pygame_gui.elements.ui_text_box.UITextBox(
-            relative_rect=pygame.Rect((50, 10), (700, 300)),
-            html_text=updated_text,
-            manager=self.manager,
-            container=self.tab_container.get_tab_container(self.run_tab_id),
-        )
+        updated_text = f"{current_text}<br>{message}"
+        self.logs_panel.set_text(updated_text)
+
+    def validate_config(self):
+        """Validate if all required configuration fields are filled."""
+        try:
+            for key, field in self.simulation_fields.items():
+                if field.get_text() == "from save":
+                    field.disable()
+                else:
+                    field.enable()
+                if field.get_text() == "":
+                    return False
+            for key, field in self.server_fields.items():
+                if field.get_text() == "":
+                    return False
+            return True
+        except Exception as e:
+            self.update_logs(f"[Error] Validation failed: {e}")
+            return False
+
+        
+    def shutdown(self):
+        """
+        Clean up resources and detach the log handler.
+        """
+        if hasattr(self, "gui_handler") and self.gui_handler in logger.handlers:
+            logger.removeHandler(self.gui_handler)
+            self.gui_handler.close()
+    
+        # Clean up pygame resources
+        pygame.display.quit()
+        pygame.font.quit()
+        pygame.quit()
+
+
 
     def run(self):
         """Main loop."""
         clock = pygame.time.Clock()
-
+        self.start_stop_button.disable()  # Initially disable the button
+        
+        
         while self.running:
             time_delta = clock.tick(60) / 1000.0
 
@@ -340,10 +646,28 @@ class ServerGUI:
                         self.load_save()
                     elif event.ui_element == self.save_button:
                         self.save_simulation()
+                    elif event.ui_element == self.new_game_button:
+                        self.create_new_game()
+                elif event.type == pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION:
+                    self.handle_mod_transfer(event)
 
                 if self.popup_window and hasattr(self, "popup_window_process_event"):
                     self.popup_window_process_event(event)
+                    
+                if event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED and event.ui_element == self.log_level_dropdown:
+                    selected_level = self.log_level_dropdown.selected_option[0]  # Ensure selected_level is a string
+                    if hasattr(logging, selected_level):  # Check if the selected level is valid
+                        self.gui_handler.setLevel(getattr(logging, selected_level))
+                        logger.info(f"Log level changed to {selected_level}")
+                    else:
+                        logger.warning(f"Invalid log level selected: {selected_level}")
 
+            
+                if self.validate_config():
+                    self.start_stop_button.enable()
+                else:
+                    self.start_stop_button.disable()
+                        
                 self.manager.process_events(event)
 
             self.manager.update(time_delta)
@@ -351,7 +675,8 @@ class ServerGUI:
             self.manager.draw_ui(self.window)
             pygame.display.update()
 
-        pygame.quit()
+
+        self.shutdown()
 
 
 if __name__ == "__main__":

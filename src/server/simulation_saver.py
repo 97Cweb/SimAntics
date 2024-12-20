@@ -122,44 +122,40 @@ class SimulationSaver:
         print(f"Mods configuration saved to {mods_file_path}")
     
     
+    def load_simulation_config(save_name):
+        save_path = os.path.join("saves", save_name)
+        simulation_data = SimulationSaver._load_simulation_attributes(save_path, save_name)
+        server_data = SimulationSaver._load_server_attributes(save_path)
+        mods_data = SimulationSaver._load_mods_list(save_name)
+        return simulation_data, server_data, mods_data
+        
     def load_simulation(simulation, save_name):
         save_path = os.path.join("saves", save_name)
-        
-        print("HERE "+save_path)
-
-        SimulationSaver._load_simulation_attributes(simulation, save_path)
-        SimulationSaver._load_server_attributes(simulation, save_path)
         SimulationSaver._load_terrain_grid(simulation, save_path)
         SimulationSaver._load_pheromone_grid(simulation, save_path)
         SimulationSaver._load_players(simulation, save_path, save_name)
-        SimulationSaver._load_mods_config(simulation, save_name)
+        
 
         print(f"Simulation loaded from {save_path}")    
         
     @staticmethod
-    def _load_simulation_attributes(simulation, save_path):
+    def _load_simulation_attributes(save_path, save_name):
         with open(os.path.join(save_path, "simulation.json"), "r") as sim_file:
             simulation_data = json5.load(sim_file)
-            simulation.map_update_interval = simulation_data["map_update_interval"]
-            simulation.gas_update_interval = simulation_data["gas_update_interval"]
-            simulation.pheromone_manager.max_player_gas_count = simulation_data["max_player_gas_count"]
+            simulation_data["save_name"] = save_name
+            simulation_data["x"] = "from save"
+            simulation_data["y"] = "from save"
+            return simulation_data
 
     
        
     @staticmethod
-    def _load_server_attributes(simulation, save_path):
+    def _load_server_attributes(save_path):
         server_file_path = os.path.join(save_path, "server.json")
         if os.path.exists(server_file_path):
             with open(server_file_path, "r") as server_file:
                 server_data = json5.load(server_file)
-                simulation.set_server(Server(
-                    simulation=simulation,
-                    host=server_data["host"],
-                    port=server_data["port"],
-                    udp_port=server_data["udp_port"],
-                    inactivity_timeout=server_data["inactivity_timeout"],
-                    message_interval_rate=server_data["message_interval_rate"],
-                ))
+                return server_data
             
     @staticmethod
     def _load_terrain_grid(simulation, save_path):
@@ -231,7 +227,7 @@ class SimulationSaver:
 
 
     @staticmethod
-    def _load_mods_config(simulation, save_name):
+    def _load_mods_list(save_name):
         """
         Load the enabled mods configuration from mods.json.
     
@@ -242,23 +238,16 @@ class SimulationSaver:
         mods_file_path = os.path.join("saves", save_name, "mods.json")
         if os.path.exists(mods_file_path):
             with open(mods_file_path, "r") as mods_file:
-                mods_list = json5.load(mods_file)
-                enabled_mods = []
-                for mod in mods_list:
-                    enabled_mods.append(
-                        {
-                            "name":mod["name"],
-                            "enabled":mod["enabled"],
-                            "load_order":mod['load_order']
-                        })
-                simulation.enabled_mods = enabled_mods
+                mod_list = json5.load(mods_file)
+                enabled_mods = [mod for mod in mod_list if mod["enabled"]]
+
                 print(f"Mods configuration loaded from {mods_file_path}")
+
+                return enabled_mods
                 
-            return 1
         else:
             print(f"No mods.json found in {save_name}. Defaulting to all mods enabled.")
-            simulation.enabled_mods = []
-            return 0
+            return []
             
             
     @staticmethod
