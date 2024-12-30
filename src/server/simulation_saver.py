@@ -118,7 +118,7 @@ class SimulationSaver:
         """
         mods_file_path = os.path.join(save_path, "mods.json")
         with open(mods_file_path, "w") as mods_file:
-            json5.dump(simulation.enabled_mods, mods_file, indent=4)
+            json5.dump(simulation.active_mods, mods_file, indent=4)
         print(f"Mods configuration saved to {mods_file_path}")
     
     
@@ -239,14 +239,12 @@ class SimulationSaver:
         if os.path.exists(mods_file_path):
             with open(mods_file_path, "r") as mods_file:
                 mod_list = json5.load(mods_file)
-                enabled_mods = [mod for mod in mod_list if mod["enabled"]]
-
                 print(f"Mods configuration loaded from {mods_file_path}")
 
-                return enabled_mods
+                return mod_list
                 
         else:
-            print(f"No mods.json found in {save_name}. Defaulting to all mods enabled.")
+            print(f"No mods.json found in {save_name}.")
             return []
             
             

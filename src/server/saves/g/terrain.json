@@ -1,422 +1,422 @@
 [
     [
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
-        },
-    ],
-    [
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
+            resources: 10,
         },
     ],
     [
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
-        },
-    ],
-    [
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
+            resources: 10,
         },
     ],
     [
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
-        },
-    ],
-    [
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
+            resources: 10,
         },
     ],
     [
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
-        },
-    ],
-    [
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
-        },
-        {
-            resources: 0,
-            terrain: 0,
+            resources: 10,
         },
     ],
     [
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
     ],
     [
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
         },
         {
-            resources: 0,
             terrain: 0,
+            resources: 10,
+        },
+    ],
+    [
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+    ],
+    [
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+    ],
+    [
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+    ],
+    [
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
+        },
+        {
+            terrain: 0,
+            resources: 10,
         },
     ],
 ]

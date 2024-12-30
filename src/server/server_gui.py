@@ -5,6 +5,8 @@ import threading
 import logging
 import json5
 
+from simantics_common.mod_manager import ModManager
+
 from server import Server
 from simulation import Simulation
 from simulation_saver import SimulationSaver
@@ -58,12 +60,7 @@ class ServerGUI:
             "message_interval_rate": "",
         }
         
-        self.inactive_mod_list_gui = None
-        self.active_mod_list_gui = None    
         
-        self.mods_config = []
-        self.loaded_mod_list = []
-        self.load_mods(is_new_game=True)
         
         if any(isinstance(h, ServerGUILogHandler) for h in logger.handlers):
             # Remove the old handler
@@ -73,10 +70,19 @@ class ServerGUI:
                     h.close()  # Close the old handler properly
         
         # Add a new handler
+       # GUI Log Handler
+        self.temp_log_buffer = []  # Temporary buffer for logs
         gui_handler = ServerGUILogHandler(self)
         gui_handler.setLevel(logging.INFO)
         logger.addHandler(gui_handler)
         self.gui_handler = gui_handler
+        
+        
+        self.inactive_mod_list_gui = None
+        self.active_mod_list_gui = None   
+        
+        self.inactive_mods = []  # Initialize as empty list
+        self.active_mods = []    # Initialize as empty list
         
         
         # Server and Simulation
@@ -95,53 +101,41 @@ class ServerGUI:
         self.create_config_tab()
         self.create_run_tab()
 
-            
+        self.load_mods()
 
         # Control flags
         self.popup_window = None
         self.running = True
         
+        
+        
     
-    def load_mods(self, is_new_game):
-        """Load mods from the mods folder."""
-        self.mods_folder = "mods"
-        if not os.path.exists(self.mods_folder):
-            os.makedirs(self.mods_folder)
+    def load_mods(self):
+        """
+        Load mods using ModManager and update GUI lists.
+        """
 
-        self.mods_config = []
-        for mod in os.listdir(self.mods_folder):
-            self.mods_config.append({
-                "name": mod,
-                "enabled": False,
-                "load_order": len(self.mods_config),
-            })
-            
-        print(self.loaded_mod_list)
-             
-        if not is_new_game:
-            for active_mod in self.loaded_mod_list:
-                for mod in self.mods_config:
-                    if mod["name"] == active_mod["name"]:
-                        mod["enabled"] = active_mod["enabled"]
-                        mod["load_order"] = active_mod["load_order"]
-                            
-        # Sort mods_config by load order for active mods
-        self.mods_config.sort(key=lambda mod: mod["load_order"] if mod["enabled"] else float("inf"))
+        save_name = self.simulation_config.get("save_name", "")
+        mods_config = ModManager.load_mod_config(save_name)
+        available_mods = ModManager.scan_mods_folder()
+
+        self.active_mods, self.inactive_mods = ModManager.get_mod_status(mods_config, available_mods)
+        
+
+
+        self.update_mod_ui()
+
     
-    
+         
+    def update_mod_ui(self):
+        # Update GUI lists
         if self.inactive_mod_list_gui and self.active_mod_list_gui:
-            self.inactive_mod_list_gui.set_item_list([mod["name"] for mod in self.mods_config if not mod["enabled"]])
-            self.active_mod_list_gui.set_item_list([mod["name"] for mod in self.mods_config if mod["enabled"]])
-            
+            self.inactive_mod_list_gui.set_item_list(self.inactive_mods)
+            self.active_mod_list_gui.set_item_list(self.active_mods)
         
 
         
 
-    def save_mods(self):
-        """Save the current mod configuration to mods.json."""
-        mods_file = os.path.join("saves", self.simulation_config["save_name"], "mods.json")
-        with open(mods_file, "w") as f:
-            json5.dump(self.mods_config, f, indent=4)
 
     def create_config_tab(self):
         """Create the configuration tab with load/save functionality."""
@@ -173,14 +167,14 @@ class ServerGUI:
 
         self.inactive_mod_list_gui = pygame_gui.elements.UISelectionList(
             relative_rect=pygame.Rect((10, 50), (120, 300)),
-            item_list=[mod["name"] for mod in self.mods_config if not mod["enabled"]],
+            item_list=self.inactive_mods,
             manager=self.manager,
             container=mods_panel,
         )
 
         self.active_mod_list_gui = pygame_gui.elements.UISelectionList(
             relative_rect=pygame.Rect((150, 50), (120, 300)),
-            item_list=[mod["name"] for mod in self.mods_config if mod["enabled"]],
+            item_list=[mod["name"] for mod in self.active_mods],
             manager=self.manager,
             container=mods_panel,
         )
@@ -221,6 +215,8 @@ class ServerGUI:
             container=run_tab_panel,
         )
         
+        self.save_button.disable()  # Initially disable the save button
+        
         self.log_level_dropdown = pygame_gui.elements.UIDropDownMenu(
             options_list=["DEBUG", "INFO", "WARNING", "ERROR"],
             starting_option="INFO",
@@ -245,19 +241,16 @@ class ServerGUI:
             if event.ui_element == self.inactive_mod_list_gui:
                 mod_name = self.inactive_mod_list_gui.get_single_selection()
                 if mod_name:
-                    self.inactive_mod_list_gui.remove_items([mod_name])
-                    self.active_mod_list_gui.add_items([mod_name])
-                    for mod in self.mods_config:
-                        if mod["name"] == mod_name:
-                            mod["enabled"] = True
+                    self.active_mods.append(mod_name)
+                    self.inactive_mods.remove(mod_name)
+                    self.update_mod_ui()
             elif event.ui_element == self.active_mod_list_gui:
                 mod_name = self.active_mod_list_gui.get_single_selection()
                 if mod_name:
-                    self.active_mod_list_gui.remove_items([mod_name])
-                    self.inactive_mod_list_gui.add_items([mod_name])
-                    for mod in self.mods_config:
-                        if mod["name"] == mod_name:
-                            mod["enabled"] = False
+                    self.inactive_mods.append(mod_name)
+                    self.inactive_mods.sort()
+                    self.active_mods.remove(mod_name)
+                    self.update_mod_ui()
                     
 
     def create_config_fields(self, config, container, y_offset):
@@ -360,6 +353,7 @@ class ServerGUI:
                             "map_update_interval": 1.0,
                             "gas_update_interval": 1.0,
                             "max_player_gas_count": 32,
+                            "mods":self.active_mods,
                             
                         }
                         self.server_config = {
@@ -371,8 +365,9 @@ class ServerGUI:
 
                         self.populate_fields(self.simulation_fields, self.simulation_config)
                         self.populate_fields(self.server_fields, self.server_config)
-                        self.load_mods(is_new_game= True)
+                        self.load_mods()
                         self.update_logs(f"New game created with save name: {save_name}")
+
 
                     self.popup_window.kill()
                     self.popup_window = None
@@ -388,7 +383,9 @@ class ServerGUI:
             """Initialize and start the server."""
             
             # Validate mods
-            missing_mods = [mod["name"] for mod in self.mods_config if mod["enabled"] and mod["name"] not in [item["name"] for item in self.mods_config]]
+            available_mods = ModManager.scan_mods_folder()
+            print(available_mods)
+            missing_mods = [mod for mod in self.active_mods if  mod not in [item for item in available_mods]]
     
             if missing_mods:
                 proceed_anyway = self.show_missing_mods_popup(missing_mods)
@@ -412,6 +409,7 @@ class ServerGUI:
                 map_update_interval=self.simulation_config["map_update_interval"],
                 gas_update_interval=self.simulation_config["gas_update_interval"],
                 max_player_gas_count=self.simulation_config["max_player_gas_count"],
+                mod_list=self.active_mods,
             )
             self.server = Server(
                 simulation=self.simulation,
@@ -424,8 +422,6 @@ class ServerGUI:
             self.simulation.set_server(self.server)
             self.simulation.add_log_handler(self.gui_handler)
             
-            # Save mods configuration
-            self.save_mods()
 
             # Start server and simulation
             self.simulation_thread = threading.Thread(target=self.simulation.start, args=[self.server.outbound_queue], daemon=True)
@@ -566,7 +562,7 @@ class ServerGUI:
                         self.simulation_config, self.server_config, self.loaded_mod_list = SimulationSaver.load_simulation_config(selected)
                         self.populate_fields(self.simulation_fields, self.simulation_config)
                         self.populate_fields(self.server_fields, self.server_config)
-                        self.load_mods(is_new_game= False)
+                        self.load_mods()
                         self.update_logs(f"Selected save: {selected}")
 
                 elif event.ui_element == cancel_button:
@@ -667,6 +663,11 @@ class ServerGUI:
                     self.start_stop_button.enable()
                 else:
                     self.start_stop_button.disable()
+                    
+                if self.simulation:
+                    self.save_button.enable()
+                else:
+                    self.save_button.disable()
                         
                 self.manager.process_events(event)
 

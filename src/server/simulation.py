@@ -30,13 +30,13 @@ if not logger.hasHandlers():
 
 
 class Simulation:
-    def __init__(self, save_name, x=10, y=10, map_update_interval=1.0, gas_update_interval=1.0, max_player_gas_count=32):
+    def __init__(self, save_name, x=10, y=10, map_update_interval=1.0, gas_update_interval=1.0, max_player_gas_count=32, mod_list = []):
         self.lua = LuaRuntime(unpack_returned_tuples=True)
         self.save_name = save_name
         self.server = None
         self.message_callback = None
 
-        self.enabled_mods = []  # Dictionary to track enabled mods
+        self.active_mods = []  # Dictionary to track enabled mods
 
         self.map_update_interval = map_update_interval
         self.gas_update_interval = gas_update_interval
@@ -51,80 +51,59 @@ class Simulation:
 
         self.terrain_grid = TerrainGrid(self.lua, x, y)
         self.pheromone_manager = PheromoneManager(self.lua, x, y, max_player_gas_count=max_player_gas_count)
+        
+        # Initialize Lua scripts
+        self.lua_scripts = {}
 
         # Load core and replaceable Lua scripts
         base_path = "lua"
-        mods_path = "mods"
         core_scripts = LuaLoader.load_scripts_from_folder(self.lua, os.path.join(base_path, "core"))
         replaceable_scripts = LuaLoader.load_scripts_from_folder(self.lua, os.path.join(base_path, "replaceable"))
 
-        # Process mods
-        mod_replaceable_scripts, mod_players_scripts = self._process_mods(mods_path)
+        self._process_mods(mod_list)
 
         # Merge scripts, giving priority to mods
-        self.lua_scripts = {**core_scripts, **replaceable_scripts, **mod_replaceable_scripts}
+        self.lua_scripts.update(core_scripts)
+        self.lua_scripts.update(replaceable_scripts)
         logger.info("Loaded Lua scripts: %s", self.lua_scripts)
-        logger.debug("Player scripts: %s", mod_players_scripts)
 
-        # Create AI players from player mods
-        self._initialize_ai_players(mod_players_scripts)
+        
 
         # Initialize Lua functions
         self._initialize_lua_functions()
 
-    def _process_mods(self, mods_path):
+    def _process_mods(self, mod_list):
+        """
+        Process the given list of mods in order and load them.
+    
+        Args:
+            mod_list (list): A list of dictionaries containing mod information, including:
+                             - name: The name of the mod.
+                             - enabled: Whether the mod is enabled.
+                             - load_order: The mod's load order.
+        """
         mod_replaceable_scripts = {}
         mod_players_scripts = {}
-
-        # Load mods.json
-        found_mod_config = SimulationSaver._load_mods_config(self, self.save_name)
-        available_mods = set(os.listdir(mods_path))
-
-        # No mods.json, add all mods and enable
-        if not found_mod_config:
-            for mod in available_mods:
-                self.enabled_mods.append(
-                    {
-                        "name": mod,
-                        "enabled": True,
-                        "load_order": len(self.enabled_mods),
-                    }
-                )
-
-        # Warn about missing mods in mods.json
-        for mod in self.enabled_mods:
-            mod_name = mod["name"]
-            if mod_name not in available_mods:
-                logger.warning("Mod '%s' listed in mods.json is missing from the 'mods' folder.", mod_name)
-
-        # Process mods in sorted load order
-        sorted_mods = sorted(self.enabled_mods, key=lambda item: item["load_order"])
-
-        for mod in sorted_mods:
-            mod_name = mod["name"]
-            is_enabled = mod["enabled"]
-            if not is_enabled:
-                logger.info("Skipping disabled mod '%s'.", mod_name)
+    
+        mods_path = "mods"
+    
+        for mod in mod_list:    
+            mod_path = os.path.join(mods_path, mod)
+            print(mod_path)
+            if os.path.isdir(mod_path):
+                self.active_mods.append(mod)
+            else:
+                logger.warning("Mod '%s' is missing or not a directory.", mod)
                 continue
-
-            mod_path = os.path.join(mods_path, mod_name)
-            if not os.path.isdir(mod_path):
-                logger.warning("Skipping '%s' as it is not a directory.", mod_name)
-                continue
-
-            # Check for mod.json
-            mod_metadata_path = os.path.join(mod_path, "mod.json")
-            if not os.path.exists(mod_metadata_path):
-                logger.warning("Mod '%s' is missing 'mod.json', skipping.", mod_name)
-                continue
-
-            # Process 'replaceable' folder
+        
+    
+            # Load replaceable scripts
             replaceable_path = os.path.join(mod_path, "replaceable")
             if os.path.isdir(replaceable_path):
                 replaceable_scripts = LuaLoader.load_scripts_from_folder(self.lua, replaceable_path)
                 mod_replaceable_scripts.update(replaceable_scripts)
-
-            # Process 'players' folder
+    
+            # Load player scripts
             players_path = os.path.join(mod_path, "players")
             if os.path.isdir(players_path):
                 for player_name in os.listdir(players_path):
@@ -132,8 +111,12 @@ class Simulation:
                     if os.path.isdir(player_path):
                         player_script = LuaLoader.load_scripts_from_folder(self.lua, player_path)
                         mod_players_scripts[player_name] = player_script
+    
+        print(self.active_mods)
+        # Merge mod scripts with core and replaceable scripts
+        self.lua_scripts.update(mod_replaceable_scripts)
+        self._initialize_ai_players(mod_players_scripts)
 
-        return mod_replaceable_scripts, mod_players_scripts
 
     def _initialize_ai_players(self, mod_players_scripts):
         for player_name, script in mod_players_scripts.items():
