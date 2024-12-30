@@ -7,8 +7,8 @@ from player import Player
 from nest import Nest
 from ant import Ant
 
-from server import Server
-
+from terrain_grid import TerrainGrid
+from pheromone_manager import PheromoneManager
 
 
 class SimulationSaver:
@@ -16,7 +16,7 @@ class SimulationSaver:
     def create_save_folder(simulation, save_name):
         save_path = os.path.join("saves", save_name)
         os.makedirs(save_path, exist_ok=True)
-        if simulation.save_name != save_name:
+        if simulation.simulation_config["save_name"] != save_name:
             players_src = os.path.join("saves", simulation.save_name,"players")
             players_dest = os.path.join("saves", save_name, "players")
             if os.path.exists(players_src):
@@ -26,8 +26,8 @@ class SimulationSaver:
 
 
     @staticmethod
-    def save_simulation(simulation, save_name):
-        save_path = SimulationSaver.create_save_folder(simulation, save_name)
+    def save_simulation(simulation):
+        save_path = SimulationSaver.create_save_folder(simulation, simulation.simulation_config["save_name"])
 
         SimulationSaver._save_simulation_attributes(simulation, save_path)
         SimulationSaver._save_server_attributes(simulation, save_path)
@@ -41,9 +41,9 @@ class SimulationSaver:
     @staticmethod
     def _save_simulation_attributes(simulation, save_path):
         simulation_data = {
-            "map_update_interval": simulation.map_update_interval,
-            "gas_update_interval": simulation.gas_update_interval,
-            "max_player_gas_count": simulation.pheromone_manager.max_player_gas_count,
+            "map_update_interval": simulation.simulation_config["map_update_interval"],
+            "gas_update_interval": simulation.simulation_config["gas_update_interval"],
+            "max_player_gas_count": simulation.simulation_config["max_player_gas_count"],
         }
         with open(os.path.join(save_path, "simulation.json"), "w") as sim_file:
             json5.dump(simulation_data, sim_file, indent=4)
@@ -52,7 +52,6 @@ class SimulationSaver:
     def _save_server_attributes(simulation, save_path):
         if simulation.server:
             server_data = {
-                "host": simulation.server.host,
                 "port": simulation.server.port,
                 "udp_port": simulation.server.udp_port,
                 "inactivity_timeout": simulation.server.inactivity_timeout,
@@ -118,62 +117,92 @@ class SimulationSaver:
         """
         mods_file_path = os.path.join(save_path, "mods.json")
         with open(mods_file_path, "w") as mods_file:
-            json5.dump(simulation.active_mods, mods_file, indent=4)
+            json5.dump(simulation.mods, mods_file, indent=4)
         print(f"Mods configuration saved to {mods_file_path}")
     
+
     
-    def load_simulation_config(save_name):
+    @staticmethod
+    def get_simulation_config(save_name):
         save_path = os.path.join("saves", save_name)
-        simulation_data = SimulationSaver._load_simulation_attributes(save_path, save_name)
-        server_data = SimulationSaver._load_server_attributes(save_path)
-        mods_data = SimulationSaver._load_mods_list(save_name)
-        return simulation_data, server_data, mods_data
-        
+    
+        simulation_config = {}
+        server_config = {}
+    
+        # Load simulation attributes
+        sim_file = os.path.join(save_path, "simulation.json")
+        if os.path.exists(sim_file):
+            with open(sim_file, "r") as file:
+                simulation_config = json5.load(file)
+    
+        # Load server attributes
+        server_file = os.path.join(save_path, "server.json")
+        if os.path.exists(server_file):
+            with open(server_file, "r") as file:
+                server_config = json5.load(file)
+    
+    
+        return simulation_config, server_config
+
+
+    @staticmethod
     def load_simulation(simulation, save_name):
         save_path = os.path.join("saves", save_name)
-        SimulationSaver._load_terrain_grid(simulation, save_path)
+
+        # Load and apply attributes to simulation
+        SimulationSaver._load_simulation_attributes(simulation, save_path)
+        SimulationSaver._load_server_attributes(simulation, save_path)
+        simulation.terrain_grid = SimulationSaver._load_terrain_grid(simulation.lua, save_path)
         SimulationSaver._load_pheromone_grid(simulation, save_path)
         SimulationSaver._load_players(simulation, save_path, save_name)
-        
 
-        print(f"Simulation loaded from {save_path}")    
+        print(f"Simulation loaded from {save_path}")
         
     @staticmethod
-    def _load_simulation_attributes(save_path, save_name):
+    def _load_simulation_attributes(simulation, save_path):
         with open(os.path.join(save_path, "simulation.json"), "r") as sim_file:
-            simulation_data = json5.load(sim_file)
-            simulation_data["save_name"] = save_name
-            simulation_data["x"] = "from save"
-            simulation_data["y"] = "from save"
-            return simulation_data
+            data = json5.load(sim_file)
+            simulation.map_update_interval = data["map_update_interval"]
+            simulation.gas_update_interval = data["gas_update_interval"]
 
     
        
     @staticmethod
-    def _load_server_attributes(save_path):
+    def _load_server_attributes(simulation, save_path):
         server_file_path = os.path.join(save_path, "server.json")
         if os.path.exists(server_file_path):
             with open(server_file_path, "r") as server_file:
                 server_data = json5.load(server_file)
-                return server_data
+                simulation.server_config = server_data
             
     @staticmethod
-    def _load_terrain_grid(simulation, save_path):
+    def _load_terrain_grid(lua_runtime, save_path):
         with open(os.path.join(save_path, "terrain.json"), "r") as terrain_file:
             terrain_data = json5.load(terrain_file)
-            simulation.terrain_grid.grid = [
-                [simulation.terrain_grid.lua.table_from(cell) for cell in row]
-                for row in terrain_data
-            ]
+        return TerrainGrid(lua_runtime, grid=terrain_data)
 
     
     @staticmethod
     def _load_pheromone_grid(simulation, save_path):
         with open(os.path.join(save_path, "pheromones.json"), "r") as pheromone_file:
             pheromone_data = json5.load(pheromone_file)
-            simulation.pheromone_manager.grid = pheromone_data["grid"]
-            simulation.pheromone_manager.pheromone_definitions = pheromone_data["pheromone_definitions"]
-            simulation.pheromone_manager.uuid_to_pheromone = pheromone_data["uuid_to_pheromone"]
+    
+    
+            # Determine grid dimensions if the grid is empty
+            grid = pheromone_data.get("grid", {})
+            width = simulation.simulation_config.get("x", 0)
+            height = simulation.simulation_config.get("y", 0)
+            # Create a new PheromoneManager instance
+            simulation.pheromone_manager = PheromoneManager(
+                lua_runtime=simulation.lua,
+                max_player_gas_count=simulation.simulation_config["max_player_gas_count"],
+                grid=grid,
+                width=width,
+                height=height,
+                pheromone_definitions=pheromone_data.get("pheromone_definitions"),
+                uuid_to_pheromone=pheromone_data.get("uuid_to_pheromone")
+            )
+
 
     @staticmethod
     def _load_players(simulation, save_path, save_name):
@@ -192,7 +221,9 @@ class SimulationSaver:
                     
                 simulation.players[username] = player
 
-                player.pheromone_definitions = player_data["pheromone_definitions"]
+                # Handle missing pheromone_definitions
+                player.pheromone_definitions = player_data.get("pheromone_definitions", [])
+
                 
                 
                 # Load nests

@@ -3,7 +3,6 @@ import pygame
 import pygame_gui
 import threading
 import logging
-import json5
 
 from simantics_common.mod_manager import ModManager
 
@@ -29,9 +28,6 @@ class ServerGUI:
         pygame.font.quit()
         pygame.font.init()
         
-        print("Pygame initialized:", pygame.get_init())
-        print("Font initialized:", pygame.font.get_init())
-        print("Display initialized:", pygame.display.get_init())
 
         # Window settings
         self.window_size = (800, 600)
@@ -115,7 +111,7 @@ class ServerGUI:
         Load mods using ModManager and update GUI lists.
         """
 
-        save_name = self.simulation_config.get("save_name", "")
+        save_name = self.simulation_config["save_name"]
         mods_config = ModManager.load_mod_config(save_name)
         available_mods = ModManager.scan_mods_folder()
 
@@ -251,6 +247,7 @@ class ServerGUI:
                     self.inactive_mods.sort()
                     self.active_mods.remove(mod_name)
                     self.update_mod_ui()
+            
                     
 
     def create_config_fields(self, config, container, y_offset):
@@ -353,7 +350,6 @@ class ServerGUI:
                             "map_update_interval": 1.0,
                             "gas_update_interval": 1.0,
                             "max_player_gas_count": 32,
-                            "mods":self.active_mods,
                             
                         }
                         self.server_config = {
@@ -367,6 +363,7 @@ class ServerGUI:
                         self.populate_fields(self.server_fields, self.server_config)
                         self.load_mods()
                         self.update_logs(f"New game created with save name: {save_name}")
+                        self.load_from_save = False
 
 
                     self.popup_window.kill()
@@ -384,14 +381,12 @@ class ServerGUI:
             
             # Validate mods
             available_mods = ModManager.scan_mods_folder()
-            print(available_mods)
             missing_mods = [mod for mod in self.active_mods if  mod not in [item for item in available_mods]]
-    
             if missing_mods:
                 proceed_anyway = self.show_missing_mods_popup(missing_mods)
                 if not proceed_anyway:
                     return
-            
+           
             self.start_stop_button.set_text("...")
 
             # Disable configuration fields
@@ -402,14 +397,12 @@ class ServerGUI:
             self.read_config_fields(self.server_fields, self.server_config)
 
             # Update simulation and server based on the configuration
+            
+
             self.simulation = Simulation(
-                save_name=self.simulation_config["save_name"],
-                x=self.simulation_config["x"],
-                y=self.simulation_config["y"],
-                map_update_interval=self.simulation_config["map_update_interval"],
-                gas_update_interval=self.simulation_config["gas_update_interval"],
-                max_player_gas_count=self.simulation_config["max_player_gas_count"],
-                mod_list=self.active_mods,
+                simulation_config=self.simulation_config,
+                mods = self.active_mods,
+                load_from_save=self.load_from_save
             )
             self.server = Server(
                 simulation=self.simulation,
@@ -559,11 +552,15 @@ class ServerGUI:
                         self.popup_window = None
                         self.simulation_config["save_name"] = selected
 
-                        self.simulation_config, self.server_config, self.loaded_mod_list = SimulationSaver.load_simulation_config(selected)
+                        # Use SimulationSaver to fetch configs
+                        simulation_config, server_config = SimulationSaver.get_simulation_config(selected)
+                        self.simulation_config.update(simulation_config)
+                        self.server_config.update(server_config)
                         self.populate_fields(self.simulation_fields, self.simulation_config)
                         self.populate_fields(self.server_fields, self.server_config)
                         self.load_mods()
                         self.update_logs(f"Selected save: {selected}")
+                        self.load_from_save = True
 
                 elif event.ui_element == cancel_button:
                     self.popup_window.kill()
@@ -577,7 +574,7 @@ class ServerGUI:
         self.read_config_fields(self.simulation_fields, self.simulation_config)
         
         save_name = self.simulation_config["save_name"]
-        SimulationSaver.save_simulation(self.simulation, save_name)
+        SimulationSaver.save_simulation(self.simulation)
         self.update_logs(f"Simulation saved to: {save_name}")
 
     def update_logs(self, message):
@@ -590,19 +587,25 @@ class ServerGUI:
         """Validate if all required configuration fields are filled."""
         try:
             for key, field in self.simulation_fields.items():
-                if field.get_text() == "from save":
+                if key in ["x", "y"] and self.load_from_save:
+                    # Grey out the x and y fields if loading from a file
                     field.disable()
                 else:
                     field.enable()
-                if field.get_text() == "":
+    
+                # Skip validation for x and y if loading from save
+                if not (key in ["x", "y"] and self.load_from_save) and field.get_text() == "":
                     return False
+    
             for key, field in self.server_fields.items():
                 if field.get_text() == "":
                     return False
+    
             return True
         except Exception as e:
             self.update_logs(f"[Error] Validation failed: {e}")
             return False
+
 
         
     def shutdown(self):
@@ -675,6 +678,8 @@ class ServerGUI:
             self.window.fill((0, 0, 0))  # Clear the screen with black
             self.manager.draw_ui(self.window)
             pygame.display.update()
+            
+            
 
 
         self.shutdown()

@@ -30,16 +30,26 @@ if not logger.hasHandlers():
 
 
 class Simulation:
-    def __init__(self, save_name, x=10, y=10, map_update_interval=1.0, gas_update_interval=1.0, max_player_gas_count=32, mod_list = []):
+    def __init__(self,simulation_config, mods,  load_from_save = False):
         self.lua = LuaRuntime(unpack_returned_tuples=True)
-        self.save_name = save_name
         self.server = None
         self.message_callback = None
 
-        self.active_mods = []  # Dictionary to track enabled mods
+        self.simulation_config = simulation_config
 
-        self.map_update_interval = map_update_interval
-        self.gas_update_interval = gas_update_interval
+        # self.simulation_config = {
+        #     "save_name": save_name,
+        #     "x": 10,
+        #     "y": 10,
+        #     "map_update_interval": 1.0,
+        #     "gas_update_interval": 1.0,
+        #     "max_player_gas_count": 32,
+            
+        # }
+        
+        self.mods = mods
+        self.active_mods = []
+        
         self.last_map_update = time.time()
         self.last_gas_update = time.time()
 
@@ -49,8 +59,13 @@ class Simulation:
         self.command_queue = Queue()
         self.players = {}
 
-        self.terrain_grid = TerrainGrid(self.lua, x, y)
-        self.pheromone_manager = PheromoneManager(self.lua, x, y, max_player_gas_count=max_player_gas_count)
+        if load_from_save:
+             SimulationSaver.load_simulation(self, self.simulation_config["save_name"])
+        else:
+            self.terrain_grid = TerrainGrid(self.lua, width = self.simulation_config["x"], height=self.simulation_config["y"])
+            self.pheromone_manager = PheromoneManager(self.lua, self.simulation_config["x"], self.simulation_config["y"], 
+                                                      max_player_gas_count=self.simulation_config["max_player_gas_count"]
+                                                      )
         
         # Initialize Lua scripts
         self.lua_scripts = {}
@@ -60,7 +75,7 @@ class Simulation:
         core_scripts = LuaLoader.load_scripts_from_folder(self.lua, os.path.join(base_path, "core"))
         replaceable_scripts = LuaLoader.load_scripts_from_folder(self.lua, os.path.join(base_path, "replaceable"))
 
-        self._process_mods(mod_list)
+        self._process_mods(self.mods)
 
         # Merge scripts, giving priority to mods
         self.lua_scripts.update(core_scripts)
@@ -89,7 +104,6 @@ class Simulation:
     
         for mod in mod_list:    
             mod_path = os.path.join(mods_path, mod)
-            print(mod_path)
             if os.path.isdir(mod_path):
                 self.active_mods.append(mod)
             else:
@@ -112,7 +126,6 @@ class Simulation:
                         player_script = LuaLoader.load_scripts_from_folder(self.lua, player_path)
                         mod_players_scripts[player_name] = player_script
     
-        print(self.active_mods)
         # Merge mod scripts with core and replaceable scripts
         self.lua_scripts.update(mod_replaceable_scripts)
         self._initialize_ai_players(mod_players_scripts)
@@ -137,7 +150,7 @@ class Simulation:
             raise
 
     def start(self, server_outbound_queue):
-        SimulationSaver.save_simulation(self, self.save_name)
+        SimulationSaver.save_simulation(self)
         self.running = True
         self.server_outbound_queue = server_outbound_queue
         threading.Thread(target=self.run, daemon=True).start()
@@ -160,12 +173,12 @@ class Simulation:
             self.process_command(command)
 
         state_updated = False
-        if current_time - self.last_map_update >= self.map_update_interval:
+        if current_time - self.last_map_update >= self.simulation_config["map_update_interval"]:
             self.last_map_update = current_time
             self.terrain_grid.update(self.map_update_func, self.frame_counter)
             state_updated = True
 
-        if current_time - self.last_gas_update >= self.gas_update_interval:
+        if current_time - self.last_gas_update >= self.simulation_config["gas_update_interval"]:
             self.last_gas_update = current_time
             self.pheromone_manager.update(self.gas_update_func, self.frame_counter)
             state_updated = True
@@ -194,7 +207,7 @@ class Simulation:
         elif is_human:
             SimulationSaver.create_player_folder(self.save_name, username)
 
-        self.players[username] = Player(username, self.save_name, self.pheromone_manager, message_callback=self.message_callback, is_human=is_human)
+        self.players[username] = Player(username, self.simulation_config["save_name"], self.pheromone_manager, message_callback=self.message_callback, is_human=is_human)
         logger.info("Player '%s' added to the simulation.", username)
 
     def broadcast_update(self, state):
