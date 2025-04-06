@@ -1,62 +1,66 @@
+import json5    
+import os
+import shutil
 import threading
 import time
-import json5
 
-from steamworks import STEAMWORKS
+
+
+
+
 
 from network_manager import NetworkManager
 class Client:
-    def __init__(self, host='127.0.0.1', tcp_port=65432, udp_port=65433, keep_alive_interval=5):
-        self.init_steam()
+    def __init__(self, steamworks, password, host='127.0.0.1', tcp_port=65432, udp_port=65433, keep_alive_interval=5):
+        self.steamworks = steamworks
         
         self.network = NetworkManager(host, tcp_port, udp_port)
         self.keep_alive_interval = keep_alive_interval
         self.running = True
         self.last_frame = 0
 
-        self.keep_alive_thread = None
-        self.udp_thread = None
-        self.tcp_thread = None
+        # Connection process
+        self.network.connect_tcp()
+        self.network.bind_udp()
+
+        auth_message = {"username": self.steamworks.Users.GetSteamID(), "password": password, "udp_port": self.network.udp_port}
+        self.network.send_tcp(auth_message)
+        response = self.network.receive_tcp()
+        server_info = json5.loads(response)
+
+        server_id = server_info.get("server_id")
+        self.ensure_save_folder_from_server_id(server_id)
+
+        self.keep_alive_thread = threading.Thread(target=self.send_keep_alive, daemon=True)
+        self.udp_thread = threading.Thread(target=self.listen_for_udp_updates, daemon=True)
+        self.tcp_thread = threading.Thread(target=self.listen_for_tcp_messages, daemon=True)
+
+        self.keep_alive_thread.start()
+        self.udp_thread.start()
+        self.tcp_thread.start()
         
-    def init_steam(self):
-        #setup steamworks
-        self.steamworks = STEAMWORKS()
-        self.steamworks.initialize()
-        if (self.steamworks.UserStats.RequestCurrentStats() == True):
-            print('Stats successfully retrieved!')
+    
 
-    def connect(self, username, password):
-        try:
-            # Connect to TCP and UDP
-            self.network.connect_tcp()
-            self.network.bind_udp()
+            
 
-            # Authenticate
-            auth_message = {"username": username, "password": password, "udp_port": self.network.udp_port}
-            self.network.send_tcp(auth_message)
-            response = self.network.receive_tcp()
-            print(f"Server response: {response}")
 
-            # Start threads
-            self.keep_alive_thread = threading.Thread(target=self.send_keep_alive, daemon=True)
-            self.udp_thread = threading.Thread(target=self.listen_for_udp_updates, daemon=True)
-            self.tcp_thread = threading.Thread(target=self.listen_for_tcp_messages, daemon=True)
+    def ensure_save_folder_from_server_id(self, server_id: str, template_path: str = "base_lua") -> str:
+        """
+        Ensures a save folder exists using the server-provided ID.
+        Populates it with template files if it's a new folder.
+        """
+        save_path = os.path.join("saves", server_id)
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+            if os.path.exists(template_path):
+                for item in os.listdir(template_path):
+                    src = os.path.join(template_path, item)
+                    dst = os.path.join(save_path, item)
+                    if os.path.isfile(src):
+                        shutil.copy2(src, dst)
+        self.server_id = server_id
+        return save_path
 
-            self.keep_alive_thread.start()
-            self.udp_thread.start()
-            self.tcp_thread.start()
-
-            # Main loop
-            print("Client running. Press Ctrl+C to stop.")
-            #while self.running:
-                #time.sleep(0.1)
-
-        except KeyboardInterrupt:
-            print("Stopping client...")
-        except Exception as e:
-            print(f"Client error: {e}")
-        finally:
-            self.shutdown()
 
     def send_keep_alive(self):
         """Send keep-alive messages periodically."""
@@ -108,6 +112,4 @@ class Client:
         if self.tcp_thread is not None:
             self.tcp_thread.join(timeout=2)
         
-        self.steamworks.unload()
-        del self.steamworks
         print("Client has stopped.")

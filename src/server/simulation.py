@@ -1,3 +1,4 @@
+import json5
 import time
 import threading
 import os
@@ -52,14 +53,25 @@ class Simulation:
 
         self.command_queue = Queue()
         self.players = {}
+        
+        save_name = self.simulation_config["save_name"]
+        save_dir = os.path.join("saves", save_name)
+        server_id_file = os.path.join(save_dir, "server_id.json")
 
-        if load_from_save:
-             SimulationSaver.load_simulation(self, self.simulation_config["save_name"])
+        if load_from_save and os.path.exists(server_id_file):
+            with open(server_id_file, "r") as f:
+                self.simulation_config["server_id"] = json5.load(f)["server_id"]
+            SimulationSaver.load_simulation(self, save_name)
         else:
             self.terrain_grid = TerrainGrid(self.lua, width = self.simulation_config["x"], height=self.simulation_config["y"])
             self.pheromone_manager = PheromoneManager(self.lua, self.simulation_config["x"], self.simulation_config["y"], 
                                                       max_player_gas_count=self.simulation_config["max_player_gas_count"]
                                                       )
+            timestamp = int(time.time())
+            self.simulation_config["server_id"] = f"{save_name}_{timestamp}"
+            os.makedirs(save_dir, exist_ok=True)
+            with open(server_id_file, "w") as f:
+                json5.dump({"server_id": self.simulation_config["server_id"]}, f)
         
         # Initialize Lua scripts
         self.lua_scripts = {}

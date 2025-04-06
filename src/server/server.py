@@ -79,7 +79,12 @@ class Server(threading.Thread):
                client_connection.client_socket = client_socket
                client_connection.udp_address = (client_socket.getpeername()[0], udp_port)
                print(f"client {username} authenticated and connected.")
-               client_socket.sendall(json5.dumps({"status": "success", "message": "Authentication succeeded"}).encode('utf-8'))
+               message = {
+                   "status": "success", 
+                   "message": "Authentication succeeded",
+                   "server_id":self.simulation.simulation_config["server_id"]
+                   }
+               client_socket.sendall(json5.dumps(message).encode('utf-8'))
                # Notify simulation of the new player
                self.notify_simulation(event="login", username=username)
                 
@@ -250,7 +255,7 @@ class Server(threading.Thread):
     def disconnect_client(self, username):
         """Handle client disconnection."""
         if username in self.connected_clients:
-            client_connection = self.connected_clients.pop(username)
+            self.connected_clients.pop(username)
             print(f"Client {username} disconnected.")
 
     def heartbeat_monitor(self):
