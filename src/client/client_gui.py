@@ -55,21 +55,6 @@ class ClientGUI:
         # Thread for network communication
         self.network_thread = threading.Thread(target=self.run_client, daemon=True)
         
-    def init_steam(self):
-        """Initialize Steamworks."""
-        try:
-            if steam_lib.SteamAPI_Init():
-                self.steam_initialized = True
-                print("Steamworks initialized successfully.")
-            else:
-                self.steam_initialized = False
-                print("Steamworks initialization failed.")
-        except AttributeError as e:
-            print(f"AttributeError: {e}")
-            self.steam_initialized = False
-        except Exception as e:
-            print(f"Error during Steamworks initialization: {e}")
-            self.steam_initialized = False
 
 
 

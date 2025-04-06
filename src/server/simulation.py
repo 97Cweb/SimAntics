@@ -13,6 +13,7 @@ from simulation_saver import SimulationSaver
 from simantics_common.lua_loader import LuaLoader
 
 
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,  # Change to DEBUG for more detailed logs
@@ -31,21 +32,14 @@ if not logger.hasHandlers():
 
 class Simulation:
     def __init__(self,simulation_config, mods,  load_from_save = False):
+        
+        
         self.lua = LuaRuntime(unpack_returned_tuples=True)
         self.server = None
         self.message_callback = None
 
         self.simulation_config = simulation_config
 
-        # self.simulation_config = {
-        #     "save_name": save_name,
-        #     "x": 10,
-        #     "y": 10,
-        #     "map_update_interval": 1.0,
-        #     "gas_update_interval": 1.0,
-        #     "max_player_gas_count": 32,
-            
-        # }
         
         self.mods = mods
         self.active_mods = []
@@ -86,6 +80,8 @@ class Simulation:
 
         # Initialize Lua functions
         self._initialize_lua_functions()
+        
+    
 
     def _process_mods(self, mod_list):
         """
@@ -157,6 +153,7 @@ class Simulation:
 
     def stop(self):
         self.running = False
+        self.steamworks.unload()
 
     def run(self):
         logger.info("Simulation started.")

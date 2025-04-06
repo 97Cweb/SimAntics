@@ -2,9 +2,13 @@ import threading
 import time
 import json5
 
+from steamworks import STEAMWORKS
+
 from network_manager import NetworkManager
 class Client:
     def __init__(self, host='127.0.0.1', tcp_port=65432, udp_port=65433, keep_alive_interval=5):
+        self.init_steam()
+        
         self.network = NetworkManager(host, tcp_port, udp_port)
         self.keep_alive_interval = keep_alive_interval
         self.running = True
@@ -13,6 +17,13 @@ class Client:
         self.keep_alive_thread = None
         self.udp_thread = None
         self.tcp_thread = None
+        
+    def init_steam(self):
+        #setup steamworks
+        self.steamworks = STEAMWORKS()
+        self.steamworks.initialize()
+        if (self.steamworks.UserStats.RequestCurrentStats() == True):
+            print('Stats successfully retrieved!')
 
     def connect(self, username, password):
         try:
@@ -88,6 +99,7 @@ class Client:
         """Shut down the client."""
         self.running = False
         self.network.close()
+        self.steamworks.unload()
         print("Client has stopped.")
 
 
