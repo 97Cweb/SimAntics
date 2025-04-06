@@ -1,9 +1,10 @@
 import pygame
 import pygame_gui
+import sys
 import threading
+
 from client import Client
 
-from simantics_SteamworksWrapper.steamworks_bindings import steam_lib 
 
 class ClientGUI:
     def __init__(self):
@@ -44,10 +45,6 @@ class ClientGUI:
             manager=self.gui_manager,
         )
         
-        # Steamworks setup
-        self.steam_initialized = False
-        self.init_steam()
-
         # Client setup
         self.client = Client()
         self.running = True
@@ -70,7 +67,7 @@ class ClientGUI:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-                self.client.shutdown()
+                
             elif event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == self.connect_button:
                     self.status_label.set_text("Status: Connected")
@@ -85,8 +82,6 @@ class ClientGUI:
             
     def update(self, time_delta):
         self.gui_manager.update(time_delta)
-        if self.steam_initialized:
-            steam_lib.run_callbacks()  # Ensure Steamworks callbacks are processed
         
     def draw(self, surface):
         surface.fill((0, 0, 0))  # Black background
@@ -103,9 +98,11 @@ class ClientGUI:
             
             self.update(time_delta)
             self.draw(self.screen)
-            
-
+        
+        #execute game close
+        self.client.shutdown()
         pygame.quit()
+        sys.exit()
 
 if __name__ == "__main__":
     gui = ClientGUI()

@@ -48,8 +48,8 @@ class Client:
 
             # Main loop
             print("Client running. Press Ctrl+C to stop.")
-            while self.running:
-                time.sleep(0.1)
+            #while self.running:
+                #time.sleep(0.1)
 
         except KeyboardInterrupt:
             print("Stopping client...")
@@ -96,13 +96,18 @@ class Client:
                 self.running = False
 
     def shutdown(self):
+        print("in shutdown")
         """Shut down the client."""
         self.running = False
         self.network.close()
+        
+        if self.keep_alive_thread is not None:
+            self.keep_alive_thread.join(timeout=2)
+        if self.udp_thread is not None:
+            self.udp_thread.join(timeout=2)
+        if self.tcp_thread is not None:
+            self.tcp_thread.join(timeout=2)
+        
         self.steamworks.unload()
+        del self.steamworks
         print("Client has stopped.")
-
-
-if __name__ == "__main__":
-    client = Client()
-    client.connect(username="cb", password="pw")
