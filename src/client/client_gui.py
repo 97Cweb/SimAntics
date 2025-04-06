@@ -30,6 +30,8 @@ class ClientGUI:
         self.running = True
         self.quit_window = None
         self.connect_window = None
+        
+        
 
 
     def init_steam(self):
@@ -53,6 +55,8 @@ class ClientGUI:
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                if self.client: 
+                    self.client.shutdown()
                 self.running = False
 
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
@@ -71,19 +75,25 @@ class ClientGUI:
                 elif event.ui_element == self.quit_window:
                     views.close_quit_popup(self)
                     
-            if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
+            elif event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
                 if event.ui_element in [self.connect_password_input, self.connect_tcp_port_input, self.connect_udp_port_input]:
                     self.on_connect_submit()
 
+            elif event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
+                if hasattr(self, 'file_bar_view'):
+                    self.file_bar_view.handle_context_action(event)
 
+            
 
             elif event.type == pygame_gui.UI_BUTTON_PRESSED:
-                
-                if hasattr(self,'file_bar_view'):
+                if hasattr(self, 'file_bar_view'):
                     self.file_bar_view.handle_click(event)
+
                 action = self.ui_element_actions.get(event.ui_element)
                 if action:
                     action()
+
+
 
             self.gui_manager.process_events(event)
 
