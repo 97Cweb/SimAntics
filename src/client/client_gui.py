@@ -31,6 +31,9 @@ class ClientGUI:
         self.quit_window = None
         self.connect_window = None
         
+
+
+        
         
 
 
@@ -59,6 +62,11 @@ class ClientGUI:
                     self.client.shutdown()
                 self.running = False
 
+
+            # Let file bar handle any events it owns (rename popup, etc.)
+            if hasattr(self, 'file_bar_view'):
+                self.file_bar_view.handle_event(event)
+
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 if self.connect_window and self.connect_window.alive():
                     self.connect_window.kill()
@@ -79,22 +87,15 @@ class ClientGUI:
                 if event.ui_element in [self.connect_password_input, self.connect_tcp_port_input, self.connect_udp_port_input]:
                     self.on_connect_submit()
 
-            elif event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
-                if hasattr(self, 'file_bar_view'):
-                    self.file_bar_view.handle_context_action(event)
-
             
 
             elif event.type == pygame_gui.UI_BUTTON_PRESSED:
-                if hasattr(self, 'file_bar_view'):
-                    self.file_bar_view.handle_click(event)
-
                 action = self.ui_element_actions.get(event.ui_element)
                 if action:
                     action()
 
 
-
+            
             self.gui_manager.process_events(event)
 
     def draw(self):
@@ -116,9 +117,6 @@ class ClientGUI:
         sys.exit()
 
     # Button Actions
-    def on_upload_clicked(self):
-        print("Upload clicked")
-
     def on_save_clicked(self):
         print("Save clicked")
 

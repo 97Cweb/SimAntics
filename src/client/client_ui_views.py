@@ -36,12 +36,6 @@ def create_game_ui(gui):
         relative_rect=pygame.Rect((0, 500), (800, 100)),
         manager=gui.gui_manager,
     )
-    gui.upload_button = pygame_gui.elements.UIButton(
-        relative_rect=pygame.Rect((700, 20), (80, 30)),
-        text="Upload",
-        manager=gui.gui_manager,
-        container=gui.file_bar
-    )
 
 
     # Create FileBarView instance (dynamically uses the client's save path)
@@ -55,11 +49,8 @@ def create_game_ui(gui):
         gui.ui_elements.append(gui.file_bar_view.scroll_panel)
 
 
-    gui.ui_elements.extend([gui.game_area, gui.file_bar, gui.upload_button])
-    gui.ui_element_actions[gui.upload_button] = gui.on_upload_clicked
+    gui.ui_elements.extend([gui.game_area, gui.file_bar])
 
-    gui.ui_elements.extend([gui.game_area, gui.file_bar, gui.upload_button])
-    gui.ui_element_actions[gui.upload_button] = gui.on_upload_clicked
 
 
 def create_editor_ui(gui):
