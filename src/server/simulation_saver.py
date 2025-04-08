@@ -292,7 +292,7 @@ class SimulationSaver:
            raise FileNotFoundError(f"Template folder {player_template_path} does not exist.")
 
         # Copy the template directory to the player's folder
-        intermediate_path = os.path.join(players_path, username) 
+        intermediate_path = os.path.join(players_path, str(username)) 
         shutil.copytree(player_template_path, intermediate_path, dirs_exist_ok = True)
         
         

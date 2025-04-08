@@ -19,6 +19,9 @@ class FileBarView:
         self.confirmation_window = None
         self.confirmation_ok_button = None
         self.confirmation_cancel_button = None
+        
+        self.upload_callback = None
+
 
 
         
@@ -173,6 +176,11 @@ class FileBarView:
                 self.creation_mode = "folder"
                 self.show_name_entry_popup("Create New Folder", "New Folder")
                 return
+            
+            elif event.ui_element == self.upload_button:
+                if self.upload_callback:
+                    self.upload_callback()
+
     
             # File/folder buttons (main bar)
             for button, path, is_folder, rename_btn, delete_btn in self.file_buttons:

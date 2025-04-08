@@ -1,8 +1,12 @@
+import base64
+import io
+import json5
 import os
+import shutil
 import socket
 import threading
-import json5
 import time
+import zipfile
 
 
 from queue import Queue
@@ -30,6 +34,9 @@ class Server(threading.Thread):
         self.unacknowledged_frames = {}  # {client_address: {frame: (timestamp, state)}}
 
         self.message_throttler = MessageThrottler(send_callback=self.send_message_to_client, interval= message_interval_rate)
+
+        self.upload_buffers = {}  # username -> bytearray
+
 
     def authenticate(self, credentials):
         """Authenticate client"""
@@ -84,14 +91,14 @@ class Server(threading.Thread):
                    "message": "Authentication succeeded",
                    "server_id":self.simulation.simulation_config["server_id"]
                    }
-               client_socket.sendall(json5.dumps(message).encode('utf-8'))
+               self.send_json_line(client_socket, message)
                # Notify simulation of the new player
                self.notify_simulation(event="login", username=username)
                 
                # Start a thread to listen for client messages
                threading.Thread(target=self.listen_for_client_messages, args=(username,), daemon=True).start()
            else:
-               client_socket.sendall(json5.dumps({"status": "error", "message": "Authentication failed"}).encode('utf-8'))
+               self.send_json_line(client_socket,{"status": "error", "message": "Authentication failed"})
                client_socket.close()
        except Exception as e:
            print(f"Error during authentication: {e}")
@@ -180,71 +187,59 @@ class Server(threading.Thread):
 
 
     def send_message_to_client(self, username, message):
-        """
-        Send a message to a specific client.
+        client_connection = self.connected_clients.get(username)
+        if client_connection:
+            self.send_json_line(client_connection.client_socket, {
+                "type": "message",
+                "content": message
+            })
+        else:
+            print(f"[Warning] Attempted to send message to {username}, but they are not connected.")
+
         
-        Args:
-            username (str): The username of the connected client.
-            message (str): The message to send.
-        """
+        
+
+
+    def handle_file_upload(self, username:str, message):
         try:
-            client_connection = self.connected_clients.get(username)
-            message = (json5.dumps({"type": "message", "content": message}) + "\n").encode('utf-8')
-            #print(message)
-            if client_connection:
-                client_connection.client_socket.sendall(message)
-                    
-            else:
-                print(f"[Warning] Attempted to send message to {username}, but they are not connected.")
+            chunk_index = message["chunk_index"]
+            total_chunks = message["total_chunks"]
+            chunk_data = base64.b64decode(message["payload"])
+            buf = self.upload_buffers.setdefault(username, bytearray())
+            buf.extend(chunk_data)
+    
+            if chunk_index == total_chunks - 1:
+                print(f"Received all {total_chunks} chunks from {username}")
+                # Extract zip
+                player = self.simulation.players.get(username)
+                if not player:
+                    raise ValueError(f"Player {username} not found.")
+                player_folder = os.path.join("saves", player.save_name, "players", str(username))
+    
+                if os.path.exists(player_folder):
+                    shutil.rmtree(player_folder)
+                os.makedirs(player_folder, exist_ok=True)
+    
+                with zipfile.ZipFile(io.BytesIO(buf)) as zipf:
+                    zipf.extractall(player_folder)
+    
+                del self.upload_buffers[username]
+    
+                print(f"Unpacked upload for {username} to {player_folder}")
+                player._initialize_lua_environment()
+                
+                self.send_json_line(
+                    self.connected_clients[username].client_socket,
+                    {"status": "success", "message": f"Upload complete for {username}."}
+                )
+
         except Exception as e:
-            print(f"[Error] Failed to send message to {username}: {e}")
-        
-        
-    def handle_file_upload(self, username, message):
-        """
-        Handle file uploads sent by the client.
-        Args:
-            username (str): The username of the player.
-            message (dict): Contains file name and content.
-        """
-        try:
-            # Ensure the player exists
-            player = self.simulation.players.get(username)
-            if not player:
-                raise ValueError(f"Player {username} not found.")
-    
-            # Extract file details
-            file_name = message.get("file_name")
-            file_content = message.get("file_content")
-            save_name = player.save_name  # Assuming the save_name is available
-    
-            if not file_name or not file_content:
-                raise ValueError("File name or content missing in upload request.")
-    
-            # Determine the player's Lua folder
-            player_lua_folder = os.path.join("saves", save_name, "players", username)
-            os.makedirs(player_lua_folder, exist_ok=True)  # Ensure the folder exists
-    
-            # Save the file
-            file_path = os.path.join(player_lua_folder, file_name)
-            with open(file_path, "w", encoding="utf-8") as f:
-                f.write(file_content)
-            print(f"File {file_name} uploaded for player {username} at {file_path}")
-    
-            # Reinitialize the player's Lua environment
-            player._initialize_lua_environment()
-    
-            # Respond to the client
-            client_connection = self.connected_clients[username]
-            client_connection.client_socket.sendall(
-                json5.dumps({"status": "success", "message": f"File {file_name} uploaded and reloaded successfully."}).encode('utf-8')
+            print(f"Error during file upload for {username}: {e}")
+            self.send_json_line(
+                self.connected_clients[username].client_socket,
+                {"status": "error", "message": str(e)}
             )
-        except Exception as e:
-            print(f"Error during file upload for player {username}: {e}")
-            client_connection = self.connected_clients[username]
-            client_connection.client_socket.sendall(
-                json5.dumps({"status": "error", "message": str(e)}).encode('utf-8')
-            )
+
 
     def notify_simulation(self, event, username):
         self.simulation.command_queue.put({
@@ -269,4 +264,12 @@ class Server(threading.Thread):
                     self.notify_simulation("logout", username)
                     self.disconnect_client(username)
                     
+    def send_json_line(self, socket_obj, data):
+        """Helper to send JSON with newline terminator."""
+        try:
+            message = json5.dumps(data) + "\n"
+            socket_obj.sendall(message.encode("utf-8"))
+        except Exception as e:
+            print(f"[Error] Failed to send message: {e}")
+
                     

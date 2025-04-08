@@ -1,8 +1,11 @@
+import base64
+import io
 import json5    
 import os
 import shutil
 import threading
 import time
+import zipfile
 
 
 
@@ -84,6 +87,7 @@ class Client:
                     print(f"Ignored outdated frame {state['frame']}")
         except Exception as e:
             print(f"UDP listener error: {e}")
+            self.running = False
 
     def listen_for_tcp_messages(self):
         """Listen for TCP messages from the server."""
@@ -94,9 +98,11 @@ class Client:
                 buffer += data
                 while "\n" in buffer:
                     message, buffer = buffer.split("\n", 1)
+                    print(f"message {message}")
                     print(f"Received: {json5.loads(message)}")
             except Exception as e:
                 print(f"TCP listener error: {e}")
+                
                 self.running = False
 
     def shutdown(self):
@@ -113,3 +119,35 @@ class Client:
             self.tcp_thread.join(timeout=2)
         
         print("Client has stopped.")
+
+
+    def upload_save_folder(self):
+        save_folder = os.path.join("saves", self.server_id)
+        
+        # Create a zip in memory
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
+            for root, dirs, files in os.walk(save_folder):
+                for file in files:
+                    full_path = os.path.join(root, file)
+                    rel_path = os.path.relpath(full_path, save_folder)
+                    zipf.write(full_path, rel_path)
+    
+        buffer.seek(0)
+        zipped_data = buffer.read()
+        
+        chunk_size = 1024
+        total_chunks = (len(zipped_data) + chunk_size - 1) // chunk_size
+    
+        for i in range(total_chunks):
+            chunk = zipped_data[i * chunk_size : (i + 1) * chunk_size]
+            chunk_b64 = base64.b64encode(chunk).decode("utf-8")
+    
+            message = {
+                "type": "file_upload",
+                "chunk_index": i,
+                "total_chunks": total_chunks,
+                "payload_type": "zip_chunk",
+                "payload": chunk_b64
+            }
+            self.network.send_tcp(message)

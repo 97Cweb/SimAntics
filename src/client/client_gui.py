@@ -107,6 +107,9 @@ class ClientGUI:
         clock = pygame.time.Clock()
         while self.running:
             time_delta = clock.tick(60) / 1000.0
+            
+            if self.client and not self.client.running and self.state == "game":
+                views.create_main_menu_ui(self)
             self.handle_events()
             self.gui_manager.update(time_delta)
             self.draw()
@@ -122,6 +125,8 @@ class ClientGUI:
 
     def on_return_clicked(self):
         views.create_game_ui(self)
+        self.file_bar_view.upload_callback = self.client.upload_save_folder
+
 
     def on_quit_os_clicked(self):
         self.client.shutdown()
@@ -150,6 +155,8 @@ class ClientGUI:
             self.connect_window.kill()
             self.connect_window = None
             views.create_game_ui(self)
+            self.file_bar_view.upload_callback = self.client.upload_save_folder
+
         except Exception as e:
             print(f"Failed to connect: {e}")
             self.status_label.set_text("Connection failed")

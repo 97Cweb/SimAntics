@@ -54,21 +54,21 @@ class Simulation:
         self.command_queue = Queue()
         self.players = {}
         
-        save_name = self.simulation_config["save_name"]
-        save_dir = os.path.join("saves", save_name)
+        self.save_name = self.simulation_config["save_name"]
+        save_dir = os.path.join("saves", self.save_name)
         server_id_file = os.path.join(save_dir, "server_id.json")
 
         if load_from_save and os.path.exists(server_id_file):
             with open(server_id_file, "r") as f:
                 self.simulation_config["server_id"] = json5.load(f)["server_id"]
-            SimulationSaver.load_simulation(self, save_name)
+            SimulationSaver.load_simulation(self, self.save_name)
         else:
             self.terrain_grid = TerrainGrid(self.lua, width = self.simulation_config["x"], height=self.simulation_config["y"])
             self.pheromone_manager = PheromoneManager(self.lua, self.simulation_config["x"], self.simulation_config["y"], 
                                                       max_player_gas_count=self.simulation_config["max_player_gas_count"]
                                                       )
             timestamp = int(time.time())
-            self.simulation_config["server_id"] = f"{save_name}_{timestamp}"
+            self.simulation_config["server_id"] = f"{self.save_name}_{timestamp}"
             os.makedirs(save_dir, exist_ok=True)
             with open(server_id_file, "w") as f:
                 json5.dump({"server_id": self.simulation_config["server_id"]}, f)
@@ -165,7 +165,6 @@ class Simulation:
 
     def stop(self):
         self.running = False
-        self.steamworks.unload()
 
     def run(self):
         logger.info("Simulation started.")
@@ -203,21 +202,21 @@ class Simulation:
             if command["event"] == "login":
                 username = command["username"]
                 if username not in self.players:
-                    logger.info("Adding player '%s'.", username)
+                    logger.info(f"Adding player {username}")
                     self.create_player(username)
         else:
-            logger.warning("Unhandled command: %s", command)
+            logger.warning(f"Unhandled command: {command}")
 
     def create_player(self, username, is_human=True):
         if username in self.players:
-            logger.info("Player '%s' already exists.", username)
+            logger.info(f"Player {username} already exists.")
             return
 
         elif is_human:
             SimulationSaver.create_player_folder(self.save_name, username)
 
-        self.players[username] = Player(username, self.simulation_config["save_name"], self.pheromone_manager, message_callback=self.message_callback, is_human=is_human)
-        logger.info("Player '%s' added to the simulation.", username)
+        self.players[username] = Player(username, self.save_name, self.pheromone_manager, message_callback=self.message_callback, is_human=is_human)
+        logger.info("Player {username} added to the simulation.")
 
     def broadcast_update(self, state):
         self.server_outbound_queue.put(state)
