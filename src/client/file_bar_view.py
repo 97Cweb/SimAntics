@@ -21,6 +21,7 @@ class FileBarView:
         self.confirmation_cancel_button = None
         
         self.upload_callback = None
+        self.file_select_callback = None
 
 
 
@@ -190,6 +191,9 @@ class FileBarView:
                         self.refresh()
                     else:
                         print(f"Clicked file: {path.name}")
+                        if self.file_select_callback:
+                            self.file_select_callback(path)
+
                     return
                 elif event.ui_element == rename_btn:
                     self.rename_selected(path)

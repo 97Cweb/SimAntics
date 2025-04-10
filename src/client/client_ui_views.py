@@ -51,17 +51,20 @@ def create_game_ui(gui):
 
     gui.ui_elements.extend([gui.game_area, gui.file_bar])
 
+    gui.file_bar_view.file_select_callback = gui.on_file_clicked
+
 
 
 def create_editor_ui(gui):
     gui.clear_ui()
     gui.state = 'editor'
 
-    gui.editor_box = pygame_gui.elements.UITextBox(
-        html_text="-- Lua code here",
+    gui.editor_box = pygame_gui.elements.UITextEntryBox(
+        initial_text="-- Lua code here",
         relative_rect=pygame.Rect((50, 50), (700, 400)),
         manager=gui.gui_manager,
     )
+
     gui.save_button = pygame_gui.elements.UIButton(
         relative_rect=pygame.Rect((600, 470), (80, 30)),
         text="Save",

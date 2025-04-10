@@ -32,11 +32,6 @@ class ClientGUI:
         self.connect_window = None
         
 
-
-        
-        
-
-
     def init_steam(self):
         #setup steamworks
         self.steamworks = STEAMWORKS()
@@ -67,7 +62,7 @@ class ClientGUI:
             if hasattr(self, 'file_bar_view'):
                 self.file_bar_view.handle_event(event)
 
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 if self.connect_window and self.connect_window.alive():
                     self.connect_window.kill()
                     self.connect_window = None
@@ -121,11 +116,26 @@ class ClientGUI:
 
     # Button Actions
     def on_save_clicked(self):
-        print("Save clicked")
+        if hasattr(self, "open_file_path"):
+            try:
+                html_text = self.editor_box.html_text
+                # Remove HTML tags if needed or store as-is
+                with open(self.open_file_path, "w", encoding="utf-8") as f:
+                    f.write(html_text)
+                print(f"Saved: {self.open_file_path}")
+            except Exception as e:
+                print(f"Failed to save: {e}")
+
 
     def on_return_clicked(self):
-        views.create_game_ui(self)
-        self.file_bar_view.upload_callback = self.client.upload_save_folder
+        current_text = self.editor_box.html_text
+        if hasattr(self, "original_text") and current_text != self.original_text:
+            self.show_save_reminder_popup()
+        else:
+            from client_ui_views import create_game_ui
+            create_game_ui(self)
+            self.file_bar_view.upload_callback = self.client.upload_save_folder
+
 
 
     def on_quit_os_clicked(self):
@@ -165,6 +175,82 @@ class ClientGUI:
 
 
 
+    def on_file_clicked(self, file_path):
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            from client_ui_views import create_editor_ui
+            create_editor_ui(self)
+            self.editor_box.set_text(content)
+            self.open_file_path = file_path  # Store to use on save
+            self.original_text = content  
+        except Exception as e:
+            print(f"Failed to open file {file_path}: {e}")
+
+    def show_save_reminder_popup(self):
+        if hasattr(self, "save_reminder_window"):
+            return
+    
+        self.save_reminder_window = pygame_gui.elements.UIWindow(
+            rect=pygame.Rect((250, 200), (300, 150)),
+            manager=self.gui_manager,
+            window_display_title="Unsaved Changes"
+        )
+    
+        pygame_gui.elements.UILabel(
+            relative_rect=pygame.Rect((20, 20), (260, 30)),
+            text="Save changes before returning?",
+            manager=self.gui_manager,
+            container=self.save_reminder_window
+        )
+    
+        save_btn = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((20, 70), (80, 30)),
+            text="Save",
+            manager=self.gui_manager,
+            container=self.save_reminder_window
+        )
+    
+        discard_btn = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((110, 70), (80, 30)),
+            text="Discard",
+            manager=self.gui_manager,
+            container=self.save_reminder_window
+        )
+    
+        cancel_btn = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((200, 70), (80, 30)),
+            text="Cancel",
+            manager=self.gui_manager,
+            container=self.save_reminder_window
+        )
+    
+        self.ui_element_actions[save_btn] = self._on_save_reminder_save
+        self.ui_element_actions[discard_btn] = self._on_save_reminder_discard
+        self.ui_element_actions[cancel_btn] = self._on_save_reminder_cancel
+
+
+    def _on_save_reminder_save(self):
+        self.on_save_clicked()
+        self.original_text = self.editor_box.get_text()  # Update after saving
+        self._close_save_reminder()
+        self.on_return_clicked()
+    
+    def _on_save_reminder_discard(self):
+        self.original_text = self.editor_box.get_text()  # Accept current state as baseline
+        self._close_save_reminder()
+        from client_ui_views import create_game_ui
+        create_game_ui(self)
+        self.file_bar_view.upload_callback = self.client.upload_save_folder
+
+    
+    def _on_save_reminder_cancel(self):
+        self._close_save_reminder()
+    
+    def _close_save_reminder(self):
+        if hasattr(self, "save_reminder_window") and self.save_reminder_window.alive():
+            self.save_reminder_window.kill()
+        self.save_reminder_window = None
 
 
 if __name__ == "__main__":
