@@ -1,10 +1,14 @@
 import pygame
 import pygame_gui
 
+from focusable_group import FocusableGroup
+
 DRAG_COLOR = (120, 120, 120)
 
-class View:
+class View(FocusableGroup):
     def __init__(self, gui, name):
+        super().__init__()
+        self.focus_on_activate = True
         self.gui = gui
         self.name = name
         self.elements = []
@@ -26,6 +30,13 @@ class View:
 
     def update(self, time_delta):
         pass
+    
+    def on_view_unfocused(self):
+        if self.current_selected:
+            if hasattr(self.current_selected, 'unselect'):
+                self.current_selected.unselect()
+            if hasattr(self.current_selected, 'unfocus'):
+                self.current_selected.unfocus()
 
     def draw_drag_handles(self, surface):
         layout = getattr(self.gui, "layout", None)

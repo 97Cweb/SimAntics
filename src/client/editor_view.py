@@ -1,7 +1,9 @@
 import pygame
 import pygame_gui
 
+from tab_friendly_textbox import TabFriendlyTextBox
 from view import View
+
 
 class EditorView(View):
     def __init__(self, gui):
@@ -10,10 +12,18 @@ class EditorView(View):
 
     def set_container(self, panel):
         super().set_container(panel)
-        self.textbox = pygame_gui.elements.UITextEntryBox(
+        self.textbox = TabFriendlyTextBox(
             initial_text="-- Lua code here",
             relative_rect=pygame.Rect((10, 10), (panel.get_container().get_size()[0] - 20, panel.get_container().get_size()[1] - 20)),
             manager=self.gui.gui_manager,
             container=self.panel
         )
         self.elements.append(self.textbox)
+        
+        self.focus_order = [self.textbox]
+        
+    def handle_event(self, event):
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_ESCAPE:
+                if self.textbox.is_focused:
+                    self.textbox.unfocus()

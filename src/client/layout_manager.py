@@ -1,12 +1,16 @@
 import pygame
 import pygame_gui
 
+from typing import override
+
 from game_view import GameView
 from editor_view import EditorView
 from file_explorer_view import FileExplorerView
+from focusable_group import FocusableGroup
 
-class LayoutManager:
+class LayoutManager(FocusableGroup):
     def __init__(self, gui):
+        super().__init__()
         self.gui = gui
         self.views = {}
         self.panels = []
@@ -19,6 +23,10 @@ class LayoutManager:
         self.min_split = 0.0
         self.max_split = 1.0
         self.create_default_layout()
+        
+        self.highlight_color = pygame.Color('#7289da')
+        self.highlight_thickness = 3
+
 
     def create_default_layout(self):
         self.destroy_all()
@@ -62,8 +70,23 @@ class LayoutManager:
         self.views['game'].set_container(game_panel)
         self.views['editor'].set_container(editor_panel)
         self.views['explorer'].set_container(file_panel)
+        
+        self.focus_order = [
+            self.views['game'],
+            self.views['editor'],
+            self.views['explorer']
+        ]
+        self.default_focus_index = 0
+        self.focus_default_element()
+
+        
+        
 
     def handle_event(self, event):
+        
+        if self.current_selected and hasattr(self.current_selected, "handle_event"):
+            self.current_selected.handle_event(event)
+        
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.vertical_split_rect.collidepoint(event.pos):
                 self.dragging_split = True
@@ -101,11 +124,27 @@ class LayoutManager:
         self.views.clear()
         self.panels.clear()
 
-    def focus_next_view(self):
-        pass
 
     def on_resize(self):
         if self.gui.state != "workspace":
             return
         self.destroy_all()
         self.create_default_layout()
+    
+    @override
+    def set_selected(self, element):
+        if self.current_selected and hasattr(self.current_selected, 'on_view_unfocused'):
+            self.current_selected.on_view_unfocused()
+        super().set_selected(element)
+        
+        # Only now focus it
+        if element and getattr(element, 'focus_on_activate', True):
+            element.focus_default_element()
+
+        
+    def draw(self, surface):
+        if self.current_selected and hasattr(self.current_selected, 'panel'):
+            panel = self.current_selected.panel
+            rect = panel.get_abs_rect()
+            pygame.draw.rect(surface, self.highlight_color, rect, self.highlight_thickness)
+

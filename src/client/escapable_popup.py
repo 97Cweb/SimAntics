@@ -1,17 +1,25 @@
 import pygame
 import pygame_gui
+from abc import ABC, abstractmethod
+from focusable_group import FocusableGroup
 
-class EscapablePopup:
+class EscapablePopup(FocusableGroup, ABC):
     def __init__(self, gui, title="Popup", size=(300, 200)):
+        super().__init__()
         self.gui = gui
         self.title = title
         self.size = size
         self.window = None
+        self.focus_order = []
         self.default_button = None
         self.setup_ui()
         self.gui.active_popup = self
 
+    @abstractmethod
     def setup_ui(self):
+        pass
+
+    def make_popup_window(self):
         width, height = self.size
         x = (self.gui.screen.get_width() - width) // 2
         y = (self.gui.screen.get_height() - height) // 2
@@ -28,14 +36,10 @@ class EscapablePopup:
             manager=self.gui.gui_manager,
             container=self.window
         )
-
         self.gui.ui_element_actions[self.default_button] = self.cancel
 
     def escape(self):
         self.cancel()
-
-
-
 
     def cancel(self):
         if self.window:
@@ -43,3 +47,7 @@ class EscapablePopup:
             self.window = None
         if hasattr(self.gui, "active_popup"):
             self.gui.active_popup = None
+
+
+
+    

@@ -3,13 +3,18 @@ import pygame
 import pygame_gui
 
 from steamworks import STEAMWORKS
-from layout_manager import LayoutManager
-from quit_from_menu_popup import QuitFromMenuPopup
-from login_popup import LoginPopup
 
-class ClientGUI:
+from focusable_group import FocusableGroup
+from layout_manager import LayoutManager
+from login_popup import LoginPopup
+from quit_from_menu_popup import QuitFromMenuPopup
+
+
+class ClientGUI(FocusableGroup):
     def __init__(self):
         self.init_steam()
+        
+        super().__init__()
     
         pygame.init()
         self.screen_width = 800
@@ -17,7 +22,7 @@ class ClientGUI:
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.RESIZABLE)
         pygame.display.set_caption("Simantics Client")
 
-        self.gui_manager = pygame_gui.UIManager((self.screen_width, self.screen_height))
+        self.gui_manager = pygame_gui.UIManager((self.screen_width, self.screen_height), theme_path="theme.json")
 
         self.clock = pygame.time.Clock()
         self.running = True
@@ -62,9 +67,34 @@ class ClientGUI:
 
         self.ui_elements.extend([title, start_button, quit_button])
         self.ui_element_actions = {
-            start_button: lambda: LoginPopup(self),
+            start_button: lambda: self._open_login_popup(),
             quit_button: self.quit,
         }
+        
+        self.focus_order = [start_button, quit_button]
+        self.default_focus_index = 0
+        self.focus_default_element()
+
+
+        
+    def _open_login_popup(self):
+        if self.active_popup is None:
+            LoginPopup(self)
+            
+    def focus_next_element(self, reverse=False):
+        if self.active_popup:
+            self.active_popup.focus_next(reverse)
+        elif self.state == "main_menu":
+            self.focus_next(reverse)
+        elif self.state == "workspace" and self.layout:
+            self.layout.focus_next(reverse)
+
+    def is_text_input_active(self):
+        if self.layout and self.layout.current_selected:
+            el = self.layout.current_selected.current_selected
+            return isinstance(el, pygame_gui.elements.UITextEntryBox) and el.is_focused
+        return False
+
 
     def init_workspace(self):
         self.clear_ui()
@@ -88,6 +118,8 @@ class ClientGUI:
     def handle_events(self):
         for event in pygame.event.get():
             
+            self.gui_manager.process_events(event)
+
             
 
 
@@ -104,19 +136,43 @@ class ClientGUI:
                 self.gui_manager.set_window_resolution((self.screen_width, self.screen_height))
                 if self.layout:
                     self.layout.on_resize()
+                    
 
             elif event.type == pygame.KEYDOWN:
-                if self.state == "workspace":
-                    if event.key == pygame.K_TAB and pygame.key.get_mods() & pygame.KMOD_CTRL:
-                        self.layout.focus_next_view()
-                    # Add Tab-inside-panel support here if needed
+                if event.key == pygame.K_TAB:
+                    mods = pygame.key.get_mods()
+                    reverse = mods & pygame.KMOD_SHIFT
+                    ctrl = mods & pygame.KMOD_CTRL
                     
-                elif self.state == "main_menu":
-                    if event.key == pygame.K_ESCAPE:
-                        if self.active_popup is None:
-                            QuitFromMenuPopup(self)
-                        else:
-                            self.active_popup.escape()
+                    if self.is_text_input_active():
+                        return  # don't steal Tab from the textbox
+                
+                    if ctrl:
+                        if self.layout:
+                            self.layout.focus_next(reverse)
+                    else:
+                        if self.active_popup:
+                            self.active_popup.focus_next(reverse)
+                        elif self.state == "main_menu":
+                            self.focus_next(reverse)
+                        elif self.state == "workspace" and self.layout:
+                            selected_view = self.layout.current_selected
+                            if selected_view:
+                                selected_view.focus_next(reverse)
+
+            
+                if event.key == pygame.K_RETURN:
+                    if self.active_popup:
+                        self.active_popup.on_return()
+                    else:
+                        self.on_return()
+            
+                if event.key == pygame.K_ESCAPE:
+                    if self.active_popup:
+                        self.active_popup.escape()
+                    elif self.state == "main_menu":
+                        QuitFromMenuPopup(self)
+
 
     
             elif event.type == pygame_gui.UI_WINDOW_CLOSE: 
@@ -128,13 +184,8 @@ class ClientGUI:
                 if event.ui_element in self.ui_element_actions:
                     self.ui_element_actions[event.ui_element]()
                     
-            elif event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
-                if self.active_popup and hasattr(self.active_popup, 'on_return'):
-                    self.active_popup.on_return()
-
 
             
-            self.gui_manager.process_events(event)
             
             if self.layout:
                 self.layout.handle_event(event)
@@ -142,6 +193,11 @@ class ClientGUI:
     def draw(self):
         self.screen.fill((0, 0, 0))
         self.gui_manager.draw_ui(self.screen)
+        
+        if self.layout:
+            self.layout.draw(self.screen)
+
+        
         pygame.display.update()
 
     def run(self):
@@ -157,7 +213,8 @@ class ClientGUI:
             
             self.draw()
             
-
+        if hasattr(self, 'client'):
+            self.client.shutdown()
         pygame.quit()
         self.steamworks.unload()
         sys.exit()
