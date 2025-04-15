@@ -1,6 +1,7 @@
 import pygame
 import pygame_gui
 
+from client import Client
 from escapable_popup import EscapablePopup
 
 class LoginPopup(EscapablePopup):
@@ -61,14 +62,14 @@ class LoginPopup(EscapablePopup):
         udp_port = int(self.connect_udp_port_input.get_text())
         self.connect_submit_button.disable()
         try:
-            from client import Client
-            self.client = Client(self.gui.steamworks, password=password, host=ip, tcp_port=tcp_port, udp_port=udp_port)
+            
+            self.gui.client = Client(self.gui.steamworks, password=password, host=ip, tcp_port=tcp_port, udp_port=udp_port)
             self.cancel()
             self.gui.init_workspace()
         except Exception as e:
             print(f"Failed to connect: {e}")
-            if hasattr(self, 'client') and self.client:
+            if hasattr(self.gui, 'client') and self.gui.client:
                 self.client.shutdown()
-            self.client = None
+            self.gui.client = None
         finally:
             self.connect_submit_button.enable()

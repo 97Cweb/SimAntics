@@ -22,8 +22,3 @@ class EditorView(View):
         
         self.focus_order = [self.textbox]
         
-    def handle_event(self, event):
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_ESCAPE:
-                if self.textbox.is_focused:
-                    self.textbox.unfocus()

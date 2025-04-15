@@ -12,8 +12,11 @@ class EscapablePopup(FocusableGroup, ABC):
         self.window = None
         self.focus_order = []
         self.default_button = None
-        self.setup_ui()
+        
+    
+            
         self.gui.active_popup = self
+        self.setup_ui()
 
     @abstractmethod
     def setup_ui(self):
