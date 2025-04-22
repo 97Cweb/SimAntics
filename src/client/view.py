@@ -8,7 +8,6 @@ DRAG_COLOR = (120, 120, 120)
 class View(FocusableGroup):
     def __init__(self, gui, name):
         super().__init__()
-        self.focus_on_activate = True
         self.gui = gui
         self.name = name
         self.elements = []

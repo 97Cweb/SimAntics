@@ -14,8 +14,6 @@ class EscapablePopup(FocusableGroup, ABC):
         self.default_button = None
         
     
-            
-        self.gui.active_popup = self
         self.setup_ui()
 
     @abstractmethod

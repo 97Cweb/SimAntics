@@ -24,6 +24,16 @@ class LayoutManager(FocusableGroup):
         self.max_split = 1.0
         self.create_default_layout()
         
+        self.default_focus_index = 0
+        self.focus_default_element()
+        self.drop_focus()
+        
+        print(self.views)
+        for view in self.views.values():
+            view.drop_focus()
+        
+        self.views["game"].take_focus()
+        
         self.highlight_color = pygame.Color('#7289da')
         self.highlight_thickness = 3
 
@@ -76,8 +86,7 @@ class LayoutManager(FocusableGroup):
             self.views['editor'],
             self.views['explorer']
         ]
-        self.default_focus_index = 0
-        self.focus_default_element()
+        
 
         
         
@@ -131,15 +140,6 @@ class LayoutManager(FocusableGroup):
         self.destroy_all()
         self.create_default_layout()
     
-    @override
-    def set_selected(self, element):
-        if self.current_selected and hasattr(self.current_selected, 'on_view_unfocused'):
-            self.current_selected.on_view_unfocused()
-        super().set_selected(element)
-        
-        # Only now focus it
-        if element and getattr(element, 'focus_on_activate', True):
-            element.focus_default_element()
 
         
     def draw(self, surface):

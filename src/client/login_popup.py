@@ -69,7 +69,7 @@ class LoginPopup(EscapablePopup):
         except Exception as e:
             print(f"Failed to connect: {e}")
             if hasattr(self.gui, 'client') and self.gui.client:
-                self.client.shutdown()
+                self.gui.client.shutdown()
             self.gui.client = None
         finally:
             self.connect_submit_button.enable()

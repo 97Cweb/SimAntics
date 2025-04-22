@@ -81,7 +81,7 @@ class ClientGUI(FocusableGroup):
         
         if self.active_popup is None:
             print("opening")
-            LoginPopup(self)
+            self.active_popup = LoginPopup(self)
             
     def focus_next_element(self, reverse=False):
         if self.active_popup:
@@ -148,31 +148,37 @@ class ClientGUI(FocusableGroup):
                 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_TAB:
-                    if self.active_popup is None:
-                        mods = pygame.key.get_mods()
-                        reverse = mods & pygame.KMOD_SHIFT
-                        ctrl = mods & pygame.KMOD_CTRL
-                        
-                        if self.is_text_input_active():
-                            return  # don't steal Tab from the textbox
                     
-                        if ctrl:
-                            if self.layout:
-                                self.layout.focus_next(reverse)
-                        else:
-                            if self.active_popup:
-                                self.active_popup.focus_next(reverse)
-                            elif self.state == "main_menu":
-                                self.focus_next(reverse)
-                            elif self.state == "workspace" and self.layout:
-                                selected_view = self.layout.current_selected
-                                if selected_view:
-                                    selected_view.focus_next(reverse)
+                    mods = pygame.key.get_mods()
+                    #reverse = mods & pygame.KMOD_SHIFT
+                    reverse = False
 
+                    if self.active_popup:
+                        self.active_popup.focus_next(reverse)
+                    elif self.is_text_input_active():
+                        return  # don't steal Tab from the textbox
+                
+                    
+                            
+                    elif self.state == "main_menu":
+                        self.focus_next(reverse)
+                    elif self.state == "workspace" and self.layout: 
+                        if self.layout.current_selected.is_focused:
+                            self.layout.current_selected.focus_next(reverse)
+                        else:
+                            self.layout.focus_next(reverse)
+                        
+                if event.key == pygame.K_d:
+                    print(self.layout.is_focused)
+                    print(self.current_selected.is_focused)
             
                 if event.key == pygame.K_RETURN:
                     if self.active_popup:
                         self.active_popup.on_return()
+                    elif self.state == "workspace" and self.layout: 
+                        if self.layout.is_focused:
+                            self.layout.drop_focus()
+                            self.layout.current_selected.take_focus()
                     else:
                         self.on_return()
             
@@ -181,9 +187,13 @@ class ClientGUI(FocusableGroup):
                     if self.active_popup:
                         self.active_popup.escape()
                     elif self.state == "main_menu":
-                        QuitFromMenuPopup(self)
+                        self.active_popup = QuitFromMenuPopup(self)
                     elif self.state == "workspace":
-                        QuitFromGamePopup(self)
+                        if self.layout.current_selected.is_focused:
+                            self.layout.current_selected.drop_focus()
+                            self.layout.take_focus()
+                        else:
+                            self.active_popup = QuitFromGamePopup(self)
 
                        
 
