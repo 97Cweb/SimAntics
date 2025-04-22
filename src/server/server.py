@@ -166,6 +166,7 @@ class Server(threading.Thread):
                             print(f"Retransmitting frame {frame} to {client_address}")
                             self.udp_socket.sendto(json5.dumps(state).encode('utf-8'), client_address)
                             self.unacknowledged_frames[client_address][frame] = (current_time, state)
+                time.sleep(0.01)  # prevents tight loop and CPU hogging
 
             except Exception:
                 pass  # Handle timeout or empty queue
@@ -250,7 +251,9 @@ class Server(threading.Thread):
     def disconnect_client(self, username):
         """Handle client disconnection."""
         if username in self.connected_clients:
-            self.connected_clients.pop(username)
+            client = self.connected_clients.pop(username, None)
+            if client and client.udp_address in self.unacknowledged_frames:
+                del self.unacknowledged_frames[client.udp_address]
             print(f"Client {username} disconnected.")
 
     def heartbeat_monitor(self):
