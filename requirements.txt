@@ -3,4 +3,5 @@ lupa==2.4
 pygame-ce==2.5.5
 pygame_gui==0.6.14
 python-i18n==0.3.9
--e git+ssh://git@github.com/97cweb/SimAntics.git@2f22b353b8671a1c29183c1fc740f268815dc7d0#egg=simantics_common&subdirectory=simantics_common
+-e git+ssh://git@github.com/97cweb/SimAntics.git@6334925d70db7d60d61734d16f125d572f7175aa#egg=simantics_common&subdirectory=simantics_common
+-e git+ssh://git@github.com/97Cweb/steamworks-py.git@68fe34ded13c54db06dc0be2cdc9e6a6b3992e54#egg=steamworks
