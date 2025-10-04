@@ -56,13 +56,14 @@ class LoginPopup(EscapablePopup):
         
 
     def on_connect_submit(self):
+        
         password = self.connect_password_input.get_text()
         ip = self.connect_ip_input.get_text()
         tcp_port = int(self.connect_tcp_port_input.get_text())
         udp_port = int(self.connect_udp_port_input.get_text())
+        
         self.connect_submit_button.disable()
         try:
-            
             self.gui.client = Client(self.gui.steamworks, password=password, host=ip, tcp_port=tcp_port, udp_port=udp_port)
             self.cancel()
             self.gui.init_workspace()

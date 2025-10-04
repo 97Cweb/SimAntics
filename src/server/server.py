@@ -41,7 +41,7 @@ class Server(threading.Thread):
     def authenticate(self, credentials):
         """Authenticate client"""
         password = credentials.get("password")
-        if password == "pw":
+        if password == "a":
             return True
         return False
     

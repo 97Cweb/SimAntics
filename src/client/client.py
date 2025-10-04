@@ -25,15 +25,15 @@ class Client:
         # Connection process
         self.network.connect_tcp()
         self.network.bind_udp()
-
+    
         auth_message = {"username": self.steamworks.Users.GetSteamID(), "password": password, "udp_port": self.network.udp_port}
         self.network.send_tcp(auth_message)
         response = self.network.receive_tcp()
         server_info = json5.loads(response)
-
+        print(response)
         server_id = server_info.get("server_id")
         self.ensure_save_folder_from_server_id(server_id)
-
+        
         self.keep_alive_thread = threading.Thread(target=self.send_keep_alive, daemon=True)
         self.udp_thread = threading.Thread(target=self.listen_for_udp_updates, daemon=True)
         self.tcp_thread = threading.Thread(target=self.listen_for_tcp_messages, daemon=True)

@@ -145,6 +145,7 @@ class LayoutManager(FocusableGroup):
     def draw(self, surface):
         if self.current_selected and hasattr(self.current_selected, 'panel'):
             panel = self.current_selected.panel
-            rect = panel.get_abs_rect()
-            pygame.draw.rect(surface, self.highlight_color, rect, self.highlight_thickness)
+            if(panel):
+                rect = panel.get_abs_rect()
+                pygame.draw.rect(surface, self.highlight_color, rect, self.highlight_thickness)
 
