@@ -13,7 +13,10 @@ class Player:
         self.client = None  # To track the connected client socket
         self.save_name = save_name
                 
-        self.lua_runtime = LuaRuntime(unpack_returned_tuples=True)  # Player-specific Lua environment
+        self.lua_runtime = LuaRuntime(
+            unpack_returned_tuples=True,
+            register_builtins=False  # Security: do not expose python.builtins to Lua
+        )  # Player-specific Lua environment
         self.nests = []
         self.pheromone_manager = pheromone_manager
         

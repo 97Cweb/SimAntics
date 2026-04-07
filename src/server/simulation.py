@@ -35,7 +35,10 @@ class Simulation:
     def __init__(self,simulation_config, mods,  load_from_save = False):
         
         
-        self.lua = LuaRuntime(unpack_returned_tuples=True)
+        self.lua = LuaRuntime(
+            unpack_returned_tuples=True,
+            register_builtins=False   # Security: do not expose python.builtins to Lua
+        )
         self.server = None
         self.message_callback = None
 
