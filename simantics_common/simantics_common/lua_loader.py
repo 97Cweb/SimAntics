@@ -1,5 +1,5 @@
 import os
-from lupa.lua54 import LuaError
+from lupa.lua55 import LuaError
 
 class LuaLoader:
     @staticmethod
